@@ -2,11 +2,27 @@
 import { store } from '../state.js';
 import { PRODUCTS } from '../mockData.js';
 import { renderAddressCard } from '../components/AddressManager.js';
+import { auth, signOut } from '../firebaseConfig.js';
 
 let activeProfileTab = 'addresses'; // 'addresses', 'orders', 'wishlist', 'settings'
 
 export function renderProfilePage() {
   const user = store.user;
+
+  // Guard: if not logged in, show a prompt to sign in
+  if (!user.isLoggedIn) {
+    return `
+      <div style="min-height:80vh; display:flex; align-items:center; justify-content:center; background:var(--pjr-bg-grey);">
+        <div style="text-align:center; padding:3rem;">
+          <div style="font-size:4rem; margin-bottom:1rem;">🔐</div>
+          <h2 style="margin-bottom:0.5rem;">Please Sign In</h2>
+          <p style="color:var(--pjr-steel-grey); margin-bottom:1.5rem;">You need to be logged in to view your profile.</p>
+          <button class="btn btn-teal" id="profileSignInBtn" style="padding:0.85rem 2rem; font-size:1rem;">Sign In to PJR</button>
+        </div>
+      </div>
+    `;
+  }
+
   const addresses = store.addresses;
   const order = store.activeOrder;
   const wishlistProducts = PRODUCTS.filter(p => store.wishlist.includes(p.id));
@@ -14,6 +30,7 @@ export function renderProfilePage() {
   const steps = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
   const currentStepIndex = steps.indexOf(order.status);
   const progressPercent = (currentStepIndex / (steps.length - 1)) * 100;
+
 
   return `
     <!-- Header Banner -->
@@ -64,7 +81,7 @@ export function renderProfilePage() {
               </button>
             </nav>
 
-            <button class="btn btn-outline-white" style="width:100%; margin-top:2rem; font-size:0.85rem; padding:0.6rem;">
+            <button class="btn btn-outline-white" id="profileLogoutBtn" style="width:100%; margin-top:2rem; font-size:0.85rem; padding:0.6rem;">
               Logout Account
             </button>
           </div>
@@ -206,7 +223,7 @@ export function renderProfilePage() {
 }
 
 export function initProfilePageEvents() {
-  document.addEventListener('click', (e) => {
+  document.addEventListener('click', async (e) => {
     const navBtn = e.target.closest('.profile-nav-btn');
     if (navBtn) {
       activeProfileTab = navBtn.dataset.profileTab;
@@ -216,6 +233,20 @@ export function initProfilePageEvents() {
 
     if (e.target.id === 'pageAddNewAddressBtn' || e.target.id === 'pageAddNewAddressBtn2') {
       store.openModal('editAddress');
+    }
+
+    if (e.target.id === 'profileLogoutBtn') {
+      try {
+        await signOut(auth);
+        store.logout();
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
+      window.location.hash = '#home';
+    }
+
+    if (e.target.id === 'profileSignInBtn') {
+      store.openModal('account');
     }
   });
 }

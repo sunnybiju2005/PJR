@@ -12,57 +12,14 @@ class StateStore {
 
     this.wishlist = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_wishlist')) ? JSON.parse(localStorage.getItem('pjr_wishlist')) : ['pjr-002'];
 
-    this.addresses = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_addresses')) ? JSON.parse(localStorage.getItem('pjr_addresses')) : [
-      {
-        id: 'addr-001',
-        label: 'Home',
-        icon: '🏠',
-        fullName: 'Sudhir Kumar',
-        mobile: '+91 98765 43210',
-        houseBuilding: 'Villa 42, Jubilee Elegance',
-        street: 'Road No. 36',
-        landmark: 'Near Metro Station',
-        area: 'Jubilee Hills',
-        city: 'Hyderabad',
-        district: 'Hyderabad',
-        state: 'Telangana',
-        pincode: '500033',
-        country: 'India',
-        fullAddress: 'Villa 42, Jubilee Elegance, Road No. 36, Near Metro Station, Jubilee Hills, Hyderabad, Telangana - 500033',
-        deliveryInstructions: 'Ring doorbell twice. Leave with security guard if unavailable.',
-        lat: 17.4319,
-        lng: 78.4071,
-        isDefault: true
-      },
-      {
-        id: 'addr-002',
-        label: 'Office',
-        icon: '🏢',
-        fullName: 'Sudhir Kumar (PJR Tech)',
-        mobile: '+91 98765 43210',
-        houseBuilding: 'Level 8, Cyber Towers',
-        street: 'HITEC City Main Road',
-        landmark: 'Opposite Mindspace',
-        area: 'HITEC City',
-        city: 'Hyderabad',
-        district: 'Hyderabad',
-        state: 'Telangana',
-        pincode: '500081',
-        country: 'India',
-        fullAddress: 'Level 8, Cyber Towers, HITEC City Main Road, Opposite Mindspace, HITEC City, Hyderabad, Telangana - 500081',
-        deliveryInstructions: 'Deliver during office hours (9 AM - 6 PM). Hand over to reception desk.',
-        lat: 17.4504,
-        lng: 78.3808,
-        isDefault: false
-      }
-    ];
+    this.addresses = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_addresses')) ? JSON.parse(localStorage.getItem('pjr_addresses')) : [];
 
     this.selectedAddressId = this.addresses.find(a => a.isDefault)?.id || this.addresses[0]?.id;
 
     this.user = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_user')) ? JSON.parse(localStorage.getItem('pjr_user')) : {
-      name: 'Sudhir Kumar',
-      email: 'sudhir.pjr@example.com',
-      isLoggedIn: true
+      name: '',
+      email: '',
+      isLoggedIn: false
     };
 
     this.filters = {
@@ -284,6 +241,17 @@ class StateStore {
     this.selectedProduct = null;
     this.addressToEdit = null;
     this.notify();
+  }
+
+  login(name, email) {
+    this.user = { name, email, isLoggedIn: true };
+    this.notify();
+  }
+
+  logout() {
+    this.user = { name: '', email: '', isLoggedIn: false };
+    localStorage.removeItem('pjr_user');
+    this.closeModal();
   }
 }
 

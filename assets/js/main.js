@@ -16,6 +16,7 @@ import { initCategoryPageEvents } from './pages/CategoryPage.js';
 import { initProfilePageEvents } from './pages/ProfilePage.js';
 import { initCartPageEvents } from './pages/CartPage.js';
 import { store } from './state.js';
+import { auth, onAuthStateChanged, getRedirectResult } from './firebaseConfig.js';
 
 function renderApp() {
   const appEl = document.getElementById('app');
@@ -65,8 +66,24 @@ if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
     renderApp();
 
+    // Handle Google redirect result (when popup was blocked & redirect was used)
+    getRedirectResult(auth).catch(() => {/* ignore errors on pages without redirect */});
+
     store.subscribe(() => {
       renderApp();
+    });
+
+    // 🔥 Firebase Auth State — auto login/logout when Firebase auth changes
+    onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const name = firebaseUser.displayName || firebaseUser.email.split('@')[0];
+        store.login(name, firebaseUser.email);
+        store.closeModal();
+      } else {
+        store.user = { name: '', email: '', isLoggedIn: false };
+        localStorage.removeItem('pjr_user');
+        store.notify();
+      }
     });
   });
 }

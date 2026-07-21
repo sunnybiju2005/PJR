@@ -1,40 +1,42 @@
-/* PJR Firebase Shared Backend Configuration Layer */
+/* PJR Firebase Real Authentication — CDN ES Modules */
 
-// Firebase standard web initialization placeholder
-export const firebaseConfig = {
-  apiKey: "AIzaSyPJR_DEMO_KEY_FIREBASE_SETTINGS",
-  authDomain: "pjr-fashion-app.firebaseapp.com",
-  projectId: "pjr-fashion-app",
-  storageBucket: "pjr-fashion-app.appspot.com",
-  messagingSenderId: "94821039482",
-  appId: "1:94821039482:web:a1b2c3d4e5f6"
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAw4exMje14wkYRmMz46xiYIQpswXI27PU",
+  authDomain: "pjr-fashion.firebaseapp.com",
+  projectId: "pjr-fashion",
+  storageBucket: "pjr-fashion.firebasestorage.app",
+  messagingSenderId: "431601734777",
+  appId: "1:431601734777:web:0608548db1175a005db0a8",
+  measurementId: "G-6QYXCM7J3Z"
 };
 
-class FirebaseService {
-  constructor() {
-    this.isInitialized = false;
-    this.init();
-  }
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const googleProvider = new GoogleAuthProvider();
 
-  async init() {
-    try {
-      console.log('🔥 Initializing PJR Shared Firebase Backend Integration...');
-      // Soft initialization check
-      this.isInitialized = true;
-    } catch (err) {
-      console.warn('Firebase init fallback: Operating in local offline mode.', err);
-    }
-  }
-
-  async syncProductToFirestore(product) {
-    if (!this.isInitialized) return;
-    console.log('📡 Syncing product with Cloud Firestore:', product);
-  }
-
-  async listenToFirestoreProducts(callback) {
-    if (!this.isInitialized) return;
-    console.log('📡 Subscribed to Firestore product updates...');
-  }
-}
-
-export const firebaseService = new FirebaseService();
+export {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile
+};
