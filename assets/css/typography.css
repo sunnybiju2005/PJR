@@ -1,0 +1,55 @@
+/* PJR Typography Rules */
+body {
+  font-family: var(--font-body);
+  color: var(--pjr-dark-slate);
+  background-color: var(--pjr-pure-white);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6, .brand-font {
+  font-family: var(--font-heading);
+  color: var(--pjr-deep-navy);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); }
+h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); }
+h3 { font-size: clamp(1.3rem, 2.5vw, 1.8rem); }
+h4 { font-size: 1.25rem; }
+
+.section-subtitle {
+  font-family: var(--font-body);
+  color: var(--pjr-teal);
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.section-title {
+  margin-bottom: 1rem;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--pjr-deep-navy) 0%, var(--pjr-teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-teal {
+  color: var(--pjr-teal) !important;
+}
+
+.text-navy {
+  color: var(--pjr-deep-navy) !important;
+}
+
+.text-muted {
+  color: var(--pjr-steel-grey);
+}
