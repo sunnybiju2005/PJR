@@ -34,10 +34,12 @@ export function renderCategories() {
 
         <div class="category-cards-grid">
           ${cats.map((cat, idx) => {
-            const catId = (cat.id || '').toString().toLowerCase().trim();
+            let catId = (cat.id || '').toString().toLowerCase().trim();
+            if (catId === 'acessories' || catId.includes('access')) catId = 'accessories';
 
             // Priority 1: Check store.homepageContent (homeimages/menwear, womenwear, accessories)
             const homeContentImg = store.homepageContent ? store.homepageContent.getCategoryImageUrl(catId) : '';
+            const homeContentTitle = store.homepageContent ? store.homepageContent.getCategoryTitle(catId) : '';
             
             // Priority 2: Check store.categories
             const catStoreImg = cat.imageUrl?.trim() || cat.image?.trim() || '';
@@ -47,6 +49,14 @@ export function renderCategories() {
 
             const finalImgSrc = homeContentImg || catStoreImg || fallbackImg;
 
+            // Title: check homeContentTitle -> cat.name -> default
+            let catName = homeContentTitle || cat.name || 'Category';
+            // Auto-correct any spelling of acessories to Accessories / Luxury Accessories
+            if (catName.toLowerCase() === 'acessories') catName = 'Luxury Accessories';
+            else if (catName.toLowerCase().includes('acessories')) {
+              catName = catName.replace(/acessories/gi, 'Accessories');
+            }
+
             // Third card (Accessories) gets a special class for mobile centering
             const extraClass = idx === 2 ? 'category-card-center' : '';
 
@@ -54,13 +64,13 @@ export function renderCategories() {
               <div class="category-card ${extraClass}" data-category="${catId}">
                 <img
                   src="${finalImgSrc}"
-                  alt="${cat.name || 'Category'} Collection"
+                  alt="${catName} Collection"
                   loading="lazy"
                   onerror="this.onerror=null; this.src='${fallbackImg}';"
                 />
                 <div class="category-content">
                   <span class="badge badge-teal" style="width:fit-content; margin-bottom:0.4rem;">${cat.count || 'View All'}</span>
-                  <h3 style="color:var(--pjr-pure-white); margin-bottom:0.2rem; font-size:1.25rem;">${cat.name}</h3>
+                  <h3 style="color:var(--pjr-pure-white); margin-bottom:0.2rem; font-size:1.25rem;">${catName}</h3>
                   <p style="font-size:0.82rem; color:rgba(255,255,255,0.85); margin:0;">${cat.subtitle || 'Shop Exclusive Collection'}</p>
                 </div>
               </div>

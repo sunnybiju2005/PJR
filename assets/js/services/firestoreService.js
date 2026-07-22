@@ -19,7 +19,12 @@ class FirestoreService {
         if (snap.exists()) {
           const data = snap.data();
           store.heroData = { id: snap.id, ...data };
-          store.heroImageUrl = data.url || data.imageUrl || data.image || data.heroImage || '';
+          // Support both single-field URLs and imageUrls array format
+          store.heroImageUrl = data.url || data.imageUrl || data.image || data.heroImage
+            || (Array.isArray(data.imageUrls) && data.imageUrls[0])
+            || '';
+          // Persist to cache so refresh renders Firebase data instantly
+          try { localStorage.setItem('pjr_hero_cache', JSON.stringify(store.heroData)); } catch {}
         } else {
           store.heroData = null;
         }
@@ -39,12 +44,18 @@ class FirestoreService {
     this.syncCollection('homeimages', (data) => {
       if (data && data.length > 0) {
         const heroDoc = data.find(d => d.id === 'heroimage' || d.id === 'hero') || data[0];
-        const url = heroDoc.url || heroDoc.imageUrl || heroDoc.image || heroDoc.heroImage || '';
+        // Support both single-field URLs and imageUrls array format
+        const url = heroDoc.url || heroDoc.imageUrl || heroDoc.image || heroDoc.heroImage
+          || (Array.isArray(heroDoc.imageUrls) && heroDoc.imageUrls[0])
+          || '';
         if (url) {
           store.heroImageUrl = url;
         }
         store.homeimages = heroDoc;
-        if (!store.heroData) store.heroData = heroDoc;
+        if (!store.heroData) {
+          store.heroData = heroDoc;
+          try { localStorage.setItem('pjr_hero_cache', JSON.stringify(heroDoc)); } catch {}
+        }
       }
       store.isHeroLoading = false;
       store.notify();
@@ -68,12 +79,20 @@ class FirestoreService {
         accessories: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
       };
       store.categories = data.map(cat => {
-        const catId = (cat.id || cat.name || '').toString().toLowerCase();
+        let catId = (cat.id || cat.name || '').toString().toLowerCase().trim();
+        if (catId === 'acessories' || catId.includes('access')) catId = 'accessories';
+        
+        let catName = cat.name || cat.title || 'Accessories';
+        if (catName.toLowerCase() === 'acessories') catName = 'Luxury Accessories';
+        else if (catName.toLowerCase().includes('acessories')) {
+          catName = catName.replace(/acessories/gi, 'Accessories');
+        }
+
         const rawImg = cat.imageUrl || cat.image ||
           (Array.isArray(cat.imageUrls) && cat.imageUrls.length > 0 ? cat.imageUrls[0] : '') || '';
         const finalImg = rawImg.trim() !== '' ? rawImg.trim() :
           (categoryFallbacks[catId] || categoryFallbacks['men']);
-        return { ...cat, imageUrl: finalImg, image: finalImg };
+        return { ...cat, id: catId, name: catName, imageUrl: finalImg, image: finalImg };
       });
       store.notify();
     });

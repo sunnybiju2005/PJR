@@ -19,8 +19,17 @@ class StateStore {
     this.products = [];
     this.editorials = []; // Trending/Visual Editorial section items
     this.homeimages = {};
-    this.heroImageUrl = '';
-    this.heroData = null;
+
+    // Restore last-known Firebase hero data from cache so first render is instant
+    const _heroCache = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_hero_cache'))
+      ? (() => { try { return JSON.parse(localStorage.getItem('pjr_hero_cache')); } catch { return null; } })()
+      : null;
+    this.heroData = _heroCache || null;
+    this.heroImageUrl = _heroCache
+      ? (_heroCache.url || _heroCache.imageUrl || _heroCache.image || _heroCache.heroImage
+          || (Array.isArray(_heroCache.imageUrls) && _heroCache.imageUrls[0])
+          || '')
+      : '';
     this.isHeroLoading = true;
 
     this.cart = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_cart')) ? JSON.parse(localStorage.getItem('pjr_cart')) : [];
@@ -88,6 +97,10 @@ class StateStore {
     localStorage.setItem('pjr_wishlist', JSON.stringify(this.wishlist));
     localStorage.setItem('pjr_addresses', JSON.stringify(this.addresses));
     localStorage.setItem('pjr_user', JSON.stringify(this.user));
+    // Persist latest Firebase hero data so refresh renders it instantly
+    if (this.heroData) {
+      localStorage.setItem('pjr_hero_cache', JSON.stringify(this.heroData));
+    }
   }
 
   /* Address Management Operations */

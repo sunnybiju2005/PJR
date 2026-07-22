@@ -46,6 +46,17 @@ export class HomepageContentModel {
   }
 
   /**
+   * Returns the category title for key ('menwear', 'womenwear', 'accessories')
+   */
+  getCategoryTitle(categoryKey) {
+    const key = (categoryKey || '').toLowerCase().trim();
+    if (key === 'men' || key === 'menwear' || key === 'mens') return this.menwear.title || '';
+    if (key === 'women' || key === 'womenwear' || key === 'womens') return this.womenwear.title || '';
+    if (key === 'accessories' || key === 'accessory' || key === 'acessories') return this.accessories.title || '';
+    return '';
+  }
+
+  /**
    * Returns the category image URL for key ('menwear', 'womenwear', 'accessories')
    */
   getCategoryImageUrl(categoryKey) {
@@ -56,7 +67,7 @@ export class HomepageContentModel {
     if (key === 'women' || key === 'womenwear' || key === 'womens') {
       return this.womenwear.imageUrls[0] || '';
     }
-    if (key === 'accessories' || key === 'accessory') {
+    if (key === 'accessories' || key === 'accessory' || key === 'acessories') {
       return this.accessories.imageUrls[0] || '';
     }
     return '';

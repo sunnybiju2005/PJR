@@ -27,17 +27,25 @@ class HomepageContentService {
 
       const updateState = () => {
         store.homepageContent = new HomepageContentModel(rawData);
-        
-        // Also sync specific hero and category fields for compatibility
+
+        // Sync hero URL and data from the freshly built model
         const heroUrl = store.homepageContent.getHeroImageUrl();
         if (heroUrl) {
           store.heroImageUrl = heroUrl;
         }
-        
+
+        // If rawData.heroimage has fresh Firebase content, sync it into store.heroData
+        // and persist to cache so the next page refresh is flash-free
+        if (rawData.heroimage) {
+          store.heroData = rawData.heroimage;
+          try { localStorage.setItem('pjr_hero_cache', JSON.stringify(rawData.heroimage)); } catch {}
+        }
+
         store.isHomepageContentLoading = false;
         store.isHeroLoading = false;
         store.notify();
       };
+
 
       // 1. Listen to `homeimages` collection snapshots
       const homeImagesColRef = collection(db, 'homeimages');

@@ -15,6 +15,8 @@ service cloud.firestore {
     match /banners/{docId} { allow read: if true; allow write: if request.auth != null; }
     match /offers/{docId} { allow read: if true; allow write: if request.auth != null; }
     match /settings/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /editorials/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /homeimages/{docId} { allow read: if true; allow write: if request.auth != null; }
     
     // By default, deny all other read/write access
     match /{document=**} {
