@@ -1,12 +1,41 @@
-/* PJR Comprehensive Product Detail & Quick View Modal */
+/* PJR Comprehensive Product Detail & Quick View Modal + Size Guide Popup */
 import { store } from '../state.js';
-
 
 export function renderProductModal() {
   const product = store.selectedProduct;
   const isOpen = store.activeModal === 'quickView' && product;
 
-  if (!isOpen) return `<div class="modal-overlay" id="productModal"></div>`;
+  // Determine if product is Women's or Men's for Size Guide Image
+  const isWomen = product ? (
+    (product.gender || '').toLowerCase().includes('women') ||
+    (product.category || '').toLowerCase().includes('women')
+  ) : false;
+
+  const sizeGuideImage = isWomen
+    ? 'https://res.cloudinary.com/n4jw90yo/image/upload/v1784750886/hazdz4qxiawtlpmddcxv.png'
+    : 'https://res.cloudinary.com/n4jw90yo/image/upload/v1784750885/or9ddprei2pgbynbe99b.png';
+
+  const sizeGuideTitle = isWomen ? "Women's Fit & Size Guide" : "Men's Fit & Size Guide";
+
+  // Size Guide Popup Modal HTML
+  const sizeGuideModalHtml = `
+    <div class="modal-overlay" id="sizeGuideModal" style="z-index:1400;">
+      <div class="modal-content" style="max-width:650px; width:92%; max-height:90vh; border-radius:var(--radius-md); padding:1.5rem; background:var(--pjr-pure-white); position:relative; overflow-y:auto; box-shadow:0 15px 35px rgba(0,0,0,0.3); margin:auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid var(--pjr-light-grey);">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="font-size:1.2rem;">📐</span>
+            <h3 style="margin:0; font-size:1.2rem; color:var(--pjr-deep-navy);" id="sizeGuideModalHeading">${sizeGuideTitle}</h3>
+          </div>
+          <button class="close-btn" id="closeSizeGuideModal" style="background:var(--pjr-bg-grey); border:none; width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.1rem; color:var(--pjr-deep-navy);" title="Close Size Guide">✕</button>
+        </div>
+        <div style="text-align:center; padding:0.5rem 0;">
+          <img id="sizeGuideModalImg" src="${sizeGuideImage}" alt="${sizeGuideTitle}" style="width:100%; height:auto; max-height:70vh; object-fit:contain; border-radius:var(--radius-xs); display:block; margin:0 auto;" />
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (!isOpen) return `<div class="modal-overlay" id="productModal"></div>${sizeGuideModalHtml}`;
 
   const isWishlist = store.isInWishlist(product.id);
 
@@ -55,11 +84,13 @@ export function renderProductModal() {
               <span>Only ${product.stock} items left in stock - order soon!</span>
             </div>
 
-            <!-- Size Picker -->
+            <!-- Size Picker & Size Guide Button -->
             <div style="margin-bottom:1.5rem;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
                 <label class="form-label" style="margin:0;">Select Size (PJR Perfect Fit System)</label>
-                <a href="javascript:void(0)" style="font-size:0.8rem; color:var(--pjr-teal); font-weight:600; text-decoration:none;">Size Guide 📐</a>
+                <button type="button" id="openSizeGuideBtn" class="open-size-guide-btn" style="font-size:0.82rem; color:var(--pjr-teal); font-weight:600; text-decoration:none; background:none; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:0.25rem;">
+                  📐 <span>Size Guide</span>
+                </button>
               </div>
               <div class="size-picker" id="modalSizePicker">
                 ${product.sizes.map((s, i) => `
@@ -70,10 +101,18 @@ export function renderProductModal() {
 
             <!-- Color Swatches -->
             <div style="margin-bottom:1.5rem;">
-              <label class="form-label">Color Variant</label>
-              <div class="color-picker" id="modalColorPicker">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <label class="form-label" style="margin:0;">Color Variant: <span id="selectedColorLabel" style="font-weight:700; color:var(--pjr-teal);">${product.colors[0]?.name || 'Default'}</span></label>
+              </div>
+              <div class="color-picker" id="modalColorPicker" style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
                 ${product.colors.map((c, i) => `
-                  <div class="color-dot ${i === 0 ? 'active' : ''}" data-color="${c.name}" style="background:${c.hex};" title="${c.name}"></div>
+                  <button type="button"
+                          class="color-dot ${i === 0 ? 'active' : ''}"
+                          data-color-name="${c.name}"
+                          data-color-hex="${c.hex}"
+                          style="background:${c.hex}; width:32px; height:32px; border-radius:50%; cursor:pointer; padding:0; outline:none; transition:all 0.2s ease; border:${i === 0 ? '2px solid var(--pjr-teal)' : (c.hex.toLowerCase() === '#ffffff' || c.hex.toLowerCase() === 'white' ? '1px solid #ccc' : '2px solid transparent')}; box-shadow:${i === 0 ? '0 0 0 2px var(--pjr-teal-soft)' : '0 2px 5px rgba(0,0,0,0.15)'};"
+                          title="${c.name}">
+                  </button>
                 `).join('')}
               </div>
             </div>
@@ -111,11 +150,50 @@ export function renderProductModal() {
         </div>
       </div>
     </div>
+
+    ${sizeGuideModalHtml}
   `;
 }
 
 export function initProductModalEvents() {
   document.addEventListener('click', (e) => {
+    // Open Size Guide Modal
+    const sizeGuideBtn = e.target.closest('#openSizeGuideBtn, .open-size-guide-btn');
+    if (sizeGuideBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const product = store.selectedProduct;
+      const isWomen = product ? (
+        (product.gender || '').toLowerCase().includes('women') ||
+        (product.category || '').toLowerCase().includes('women')
+      ) : false;
+
+      const imgUrl = isWomen
+        ? 'https://res.cloudinary.com/n4jw90yo/image/upload/v1784750886/hazdz4qxiawtlpmddcxv.png'
+        : 'https://res.cloudinary.com/n4jw90yo/image/upload/v1784750885/or9ddprei2pgbynbe99b.png';
+
+      const heading = isWomen ? "Women's Fit & Size Guide" : "Men's Fit & Size Guide";
+
+      const modal = document.getElementById('sizeGuideModal');
+      const modalImg = document.getElementById('sizeGuideModalImg');
+      const modalHeading = document.getElementById('sizeGuideModalHeading');
+
+      if (modal) {
+        if (modalImg) modalImg.src = imgUrl;
+        if (modalHeading) modalHeading.textContent = heading;
+        modal.classList.add('active');
+      }
+      return;
+    }
+
+    // Close Size Guide Modal (X button or outside click)
+    if (e.target.id === 'closeSizeGuideModal' || e.target.id === 'sizeGuideModal') {
+      const modal = document.getElementById('sizeGuideModal');
+      if (modal) modal.classList.remove('active');
+      return;
+    }
+
+    // Close Product Quick View Modal
     if (e.target.id === 'closeProductModal' || e.target.id === 'productModal') {
       store.closeModal();
       return;
@@ -139,8 +217,18 @@ export function initProductModalEvents() {
 
     const colorDot = e.target.closest('#modalColorPicker .color-dot');
     if (colorDot) {
-      document.querySelectorAll('#modalColorPicker .color-dot').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#modalColorPicker .color-dot').forEach(b => {
+        b.classList.remove('active');
+        const hx = b.dataset.colorHex || '';
+        b.style.borderColor = (hx.toLowerCase() === '#ffffff' || hx.toLowerCase() === 'white') ? '#ccc' : 'transparent';
+        b.style.boxShadow = '0 2px 5px rgba(0,0,0,0.15)';
+      });
       colorDot.classList.add('active');
+      colorDot.style.borderColor = 'var(--pjr-teal)';
+      colorDot.style.boxShadow = '0 0 0 2px var(--pjr-teal-soft)';
+
+      const colorLabel = document.getElementById('selectedColorLabel');
+      if (colorLabel) colorLabel.textContent = colorDot.dataset.colorName || '';
       return;
     }
 
@@ -162,7 +250,7 @@ export function initProductModalEvents() {
       const product = store.selectedProduct;
       if (!product) return;
       const activeSize = document.querySelector('#modalSizePicker .size-btn.active')?.dataset.size || 'M';
-      const activeColor = document.querySelector('#modalColorPicker .color-dot.active')?.dataset.color || 'Default';
+      const activeColor = document.querySelector('#modalColorPicker .color-dot.active')?.dataset.colorName || 'Default';
       const qty = parseInt(document.getElementById('modalQtyVal')?.textContent || '1', 10);
 
       store.addToCart(product, activeSize, activeColor, qty);
@@ -175,3 +263,4 @@ export function initProductModalEvents() {
     }
   });
 }
+

@@ -42,6 +42,14 @@ export function renderProductCard(product) {
           <span class="price-current">₹${product.price.toLocaleString('en-IN')}</span>
           ${product.originalPrice ? `<span class="price-original">₹${product.originalPrice.toLocaleString('en-IN')}</span>` : ''}
         </div>
+
+        ${Array.isArray(product.colors) && product.colors.length > 1 ? `
+          <div class="card-color-swatches" style="display:flex; gap:0.35rem; margin-top:0.5rem; align-items:center;">
+            ${product.colors.map(c => `
+              <span style="width:12px; height:12px; border-radius:50%; background:${c.hex}; display:inline-block; border:${c.hex.toLowerCase() === '#ffffff' || c.hex.toLowerCase() === 'white' ? '1px solid #ccc' : '1px solid rgba(0,0,0,0.15)'};" title="${c.name}"></span>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>
     </div>
   `;
@@ -78,31 +86,36 @@ export function renderNewArrivals() {
 }
 
 export function renderBestSellers() {
-  const bestSellers = store.products
-    .filter(p => Boolean(p.isBestSeller))
-    .sort((a, b) => (Number(a.bestSellerOrder) || 99) - (Number(b.bestSellerOrder) || 99))
-    .slice(0, 3);
+  const bestSellers = (store.products || [])
+    .filter(p => Boolean(p.isBestSeller || p.label === 'best-seller' || p.label === 'bestseller' || p.label === 'best_seller' || p.label === 'best seller'))
+    .sort((a, b) => (Number(a.bestSellerOrder) || 99) - (Number(b.bestSellerOrder) || 99));
 
-  if (bestSellers.length === 0) {
-    return '';
-  }
+  console.log('[Home Page] Products filtered for Best Seller:', bestSellers);
 
   return `
     <section class="section" id="best-sellers" style="background:var(--pjr-bg-grey);">
       <div class="container">
         <div style="text-align:center; max-width:600px; margin:0 auto 3.5rem;">
           <span class="section-subtitle">POPULAR DEMAND</span>
-          <h2 class="section-title">Best Sellers</h2>
+          <h2 class="section-title">Best Seller Products</h2>
           <p class="text-muted">The most coveted fashion pieces loved by our luxury community.</p>
         </div>
 
-        <div style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
-          ${bestSellers.map(p => `
-            <div style="flex:1 1 280px; max-width:350px;">
-              ${renderProductCard(p)}
-            </div>
-          `).join('')}
-        </div>
+        ${bestSellers.length === 0 ? `
+          <div style="text-align:center; padding:3rem 1rem; color:var(--pjr-steel-grey); background:var(--pjr-pure-white); border-radius:var(--radius-md);">
+            <div style="font-size:2.5rem; margin-bottom:0.5rem;">⭐</div>
+            <h4 style="margin-bottom:0.25rem; color:var(--pjr-deep-navy);">No Best Seller Products</h4>
+            <p style="font-size:0.88rem; margin:0;">Select "best-seller" label in the Admin App to feature products here.</p>
+          </div>
+        ` : `
+          <div style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
+            ${bestSellers.map(p => `
+              <div style="flex:1 1 280px; max-width:350px;">
+                ${renderProductCard(p)}
+              </div>
+            `).join('')}
+          </div>
+        `}
       </div>
     </section>
   `;

@@ -120,6 +120,8 @@ class FirestoreService {
     }, 'order');
 
     const handleProductsData = (data) => {
+      console.log('[Firebase] All products fetched from Firebase:', data);
+
       const hiddenStatuses = ['hidden', 'inactive', 'draft'];
 
       const getGender = (p) => {
@@ -145,11 +147,51 @@ class FirestoreService {
           const normalizedImages = Array.isArray(imgs) ? imgs.filter(u => u && typeof u === 'string' && u.trim() !== '') : (imgs ? [imgs] : []);
           const finalImages = normalizedImages.length > 0 ? normalizedImages : ['assets/images/hero-men.png'];
 
-          let colors = p.colors || [];
-          if (Array.isArray(colors) && colors.length > 0 && typeof colors[0] === 'string') {
-            colors = colors.map(c => ({ name: c, hex: '#001B2A' }));
+          // Color variant parsing helpers
+          const COLOR_HEX_MAP = {
+            black: '#000000', white: '#FFFFFF', red: '#E53E3E', blue: '#3182CE', navy: '#001B2A',
+            'navy blue': '#001B2A', green: '#38A169', 'dark green': '#1A4D2E', yellow: '#D69E2E',
+            gold: '#D4AF37', silver: '#C0C0C0', grey: '#718096', gray: '#718096', pink: '#ED64A6',
+            purple: '#805AD5', violet: '#7C3AED', orange: '#DD6B20', brown: '#8B4513', beige: '#F5F5DC',
+            tan: '#D2B48C', maroon: '#800000', teal: '#008080', cyan: '#00FFFF', turquoise: '#40E0D0',
+            olive: '#808000', charcoal: '#36454F', cream: '#FFFDD0', ivory: '#FFFFF0', khaki: '#C3B091',
+            coral: '#FF7F50', magenta: '#FF00FF', peach: '#FFDAB9', mint: '#98FF98', wine: '#722F37',
+            burgundy: '#800020', mustard: '#FFDB58', 'sky blue': '#87CEEB', 'light blue': '#ADD8E6', 'rose gold': '#B76E79'
+          };
+
+          const resolveColorHex = (val, nameFallback = '') => {
+            const str = String(val || nameFallback).trim().toLowerCase();
+            if (str.startsWith('#') || str.startsWith('rgb') || str.startsWith('hsl')) return str;
+            if (COLOR_HEX_MAP[str]) return COLOR_HEX_MAP[str];
+            for (const [k, v] of Object.entries(COLOR_HEX_MAP)) {
+              if (str.includes(k)) return v;
+            }
+            return str.length > 0 ? str : '#001B2A';
+          };
+
+          const parseColorItem = (item) => {
+            if (!item) return null;
+            if (typeof item === 'object') {
+              const name = item.name || item.colorName || item.label || item.title || item.color || item.value || 'Variant';
+              const rawHex = item.hex || item.colorCode || item.code || item.value || item.colorHex || item.bg || item.backgroundColor || '';
+              return { name: String(name), hex: resolveColorHex(rawHex, name) };
+            }
+            if (typeof item === 'string') {
+              const trimmed = item.trim();
+              return { name: trimmed, hex: resolveColorHex(trimmed) };
+            }
+            return null;
+          };
+
+          let rawColors = p.colors || p.color || p.colorVariants || p.variants || p.availableColors || [];
+          if (typeof rawColors === 'string') {
+            rawColors = rawColors.split(',').map(s => s.trim()).filter(Boolean);
           }
-          if (!Array.isArray(colors) || colors.length === 0) {
+          let colors = [];
+          if (Array.isArray(rawColors)) {
+            colors = rawColors.map(parseColorItem).filter(Boolean);
+          }
+          if (colors.length === 0) {
             colors = [{ name: 'Default', hex: '#001B2A' }];
           }
 
@@ -160,6 +202,42 @@ class FirestoreService {
           const finalPrice = rawPrice;
           const finalOriginal = rawOriginal > rawPrice ? rawOriginal : null;
           const finalDiscount = finalOriginal ? Math.round((1 - finalPrice / finalOriginal) * 100) : 0;
+
+          // Extract label & tags/badges saved by Admin App
+          const rawLabel = (p.label || p.productLabel || p.tag || p.badge || '').toString().toLowerCase().trim();
+          const rawLabelsArray = Array.isArray(p.labels) ? p.labels.map(l => String(l).toLowerCase().trim())
+                               : (Array.isArray(p.tags) ? p.tags.map(t => String(t).toLowerCase().trim())
+                               : (Array.isArray(p.badges) ? p.badges.map(b => String(b).toLowerCase().trim()) : []));
+
+          // Match trending flags/labels
+          const isTrending = Boolean(
+            p.isTrending === true ||
+            p.trending === true ||
+            p.isTrendingCollection === true ||
+            p.trendingCollection === true ||
+            rawLabel === 'trending' ||
+            rawLabel === 'trend' ||
+            rawLabelsArray.includes('trending') ||
+            rawLabelsArray.includes('trend')
+          );
+
+          // Match best-seller flags/labels
+          const isBestSeller = Boolean(
+            p.isBestSeller === true ||
+            p.isBestseller === true ||
+            p.bestSeller === true ||
+            p.bestseller === true ||
+            rawLabel === 'best-seller' ||
+            rawLabel === 'bestseller' ||
+            rawLabel === 'best_seller' ||
+            rawLabel === 'best seller' ||
+            rawLabelsArray.includes('best-seller') ||
+            rawLabelsArray.includes('bestseller') ||
+            rawLabelsArray.includes('best seller') ||
+            rawLabelsArray.includes('best_seller')
+          );
+
+          const label = p.label || p.productLabel || p.badge || p.tag || (isTrending ? 'trending' : (isBestSeller ? 'best-seller' : ''));
 
           return {
             id: p.id,
@@ -173,7 +251,8 @@ class FirestoreService {
             rating: Number(p.rating || 4.8),
             reviewsCount: Number(p.reviewsCount || p.reviewCount || 12),
             isNew: p.isNew !== undefined ? p.isNew : true,
-            isBestSeller: Boolean(p.isBestSeller === true || p.isBestseller === true || p.bestSeller === true || p.bestseller === true),
+            label,
+            isBestSeller,
             bestSellerOrder: Number(
               p.bestSellerOrder !== undefined ? p.bestSellerOrder :
               (p.bestSellerPosition !== undefined ? p.bestSellerPosition :
@@ -181,7 +260,7 @@ class FirestoreService {
               (p.position !== undefined ? p.position :
               (p.order !== undefined ? p.order : 99))))
             ),
-            isTrending: Boolean(p.isTrending === true || p.isTrendingCollection === true || p.trending === true || p.trendingCollection === true),
+            isTrending,
             images: finalImages,
             imageUrls: finalImages,
             sizes: Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L', 'XL'],
@@ -191,6 +270,21 @@ class FirestoreService {
             specifications: p.specifications || { Fit: 'Perfect Fit', Care: 'Dry Clean' }
           };
         });
+
+      // Console logs required by task
+      console.log('[Firebase] Product labels received:', parsed.map(p => ({
+        id: p.id,
+        title: p.title,
+        label: p.label,
+        isTrending: p.isTrending,
+        isBestSeller: p.isBestSeller
+      })));
+
+      const trendingList = parsed.filter(p => p.isTrending);
+      const bestSellerList = parsed.filter(p => p.isBestSeller);
+
+      console.log('[Firebase] Products filtered for Trending:', trendingList);
+      console.log('[Firebase] Products filtered for Best Seller:', bestSellerList);
 
       // Update store products
       store.products = parsed;
