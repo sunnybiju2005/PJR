@@ -6,12 +6,8 @@ export function renderNavbar(activePage = 'home') {
   const { itemCount } = store.getCartTotals();
   const wishlistCount = store.wishlist.length;
 
-  // Pages with a dark hero image get a transparent navbar, others get a scrolled (white) navbar by default
-  const isDarkBgPage = ['home', 'men', 'women'].includes(activePage);
-  const navClass = isDarkBgPage ? 'navbar transparent' : 'navbar scrolled';
-
   return `
-    <nav class="${navClass}" id="mainNavbar">
+    <nav class="navbar scrolled" id="mainNavbar">
       <div class="container nav-container">
         <a href="index.html" class="brand-logo">
           <span class="brand-name">PJR</span>
@@ -120,19 +116,6 @@ export function renderNavbar(activePage = 'home') {
 }
 
 export function initNavbarEvents() {
-  const navbar = document.getElementById('mainNavbar');
-  if (navbar) {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
-        navbar.classList.remove('transparent');
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.add('transparent');
-        navbar.classList.remove('scrolled');
-      }
-    });
-  }
-
   // Use event delegation for all navbar clicks so they survive DOM re-renders
   document.addEventListener('click', (e) => {
     if (e.target.closest('#searchTrigger')) {

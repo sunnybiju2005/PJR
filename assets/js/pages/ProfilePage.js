@@ -28,8 +28,8 @@ export function renderProfilePage() {
   const wishlistProducts = store.products.filter(p => store.wishlist.includes(p.id));
 
   const steps = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
-  const currentStepIndex = steps.indexOf(order.status);
-  const progressPercent = (currentStepIndex / (steps.length - 1)) * 100;
+  const currentStepIndex = order ? steps.indexOf(order.status) : 0;
+  const progressPercent = order ? (currentStepIndex / (steps.length - 1)) * 100 : 0;
 
 
   return `
@@ -137,40 +137,49 @@ export function renderProfilePage() {
             ${activeProfileTab === 'orders' ? `
               <div>
                 <span class="section-subtitle">LIVE REALTIME TRACKING</span>
-                <h2 style="margin-bottom:1.5rem; font-size:1.8rem;">Order #${order.orderId}</h2>
+                ${order ? `
+                  <h2 style="margin-bottom:1.5rem; font-size:1.8rem;">Order #${order.orderId}</h2>
 
-                <div style="background:var(--pjr-bg-grey); padding:2rem; border-radius:var(--radius-md); border:1px solid var(--pjr-light-grey); margin-bottom:2rem;">
-                  <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-size:0.9rem; flex-wrap:wrap; gap:0.5rem;">
-                    <span>Order Date: <strong>${order.date}</strong></span>
-                    <span style="color:var(--pjr-teal); font-weight:700;">Express Dispatch Priority</span>
-                  </div>
-
-                  <div class="timeline-track" style="margin:2.5rem 0;">
-                    <div class="timeline-progress" style="width:${progressPercent}%;"></div>
-                    <div class="timeline-step ${currentStepIndex >= 0 ? 'completed' : ''}"><div class="step-icon">1</div><span class="step-label">Placed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 1 ? 'completed' : ''}"><div class="step-icon">2</div><span class="step-label">Confirmed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 2 ? 'completed' : ''}"><div class="step-icon">3</div><span class="step-label">Packed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 3 ? 'active' : ''}"><div class="step-icon">4</div><span class="step-label">Shipped</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 4 ? 'completed' : ''}"><div class="step-icon">5</div><span class="step-label">Delivered</span></div>
-                  </div>
-
-                  <div style="font-size:0.9rem; color:var(--pjr-steel-grey); border-top:1px solid var(--pjr-light-grey); padding-top:1rem; margin-top:1rem;">
-                    <strong>Destination Address:</strong> ${order.address || (addresses[0] ? addresses[0].fullAddress : '')}
-                  </div>
-                </div>
-
-                <h4 style="margin-bottom:1rem;">Order Items</h4>
-                <div style="display:flex; flex-direction:column; gap:0.85rem;">
-                  ${order.items.map(item => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; background:var(--pjr-pure-white); border:1px solid var(--pjr-light-grey); border-radius:var(--radius-sm);">
-                      <div>
-                        <div style="font-weight:700; color:var(--pjr-deep-navy); font-size:1rem;">${item.title}</div>
-                        <div style="font-size:0.85rem; color:var(--pjr-steel-grey);">Quantity: ${item.qty}</div>
-                      </div>
-                      <span style="font-weight:800; color:var(--pjr-teal); font-size:1.1rem;">₹${item.price.toLocaleString('en-IN')}</span>
+                  <div style="background:var(--pjr-bg-grey); padding:2rem; border-radius:var(--radius-md); border:1px solid var(--pjr-light-grey); margin-bottom:2rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:1.5rem; font-size:0.9rem; flex-wrap:wrap; gap:0.5rem;">
+                      <span>Order Date: <strong>${order.date}</strong></span>
+                      <span style="color:var(--pjr-teal); font-weight:700;">Express Dispatch Priority</span>
                     </div>
-                  `).join('')}
-                </div>
+
+                    <div class="timeline-track" style="margin:2.5rem 0;">
+                      <div class="timeline-progress" style="width:${progressPercent}%;"></div>
+                      <div class="timeline-step ${currentStepIndex >= 0 ? 'completed' : ''}"><div class="step-icon">1</div><span class="step-label">Placed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 1 ? 'completed' : ''}"><div class="step-icon">2</div><span class="step-label">Confirmed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 2 ? 'completed' : ''}"><div class="step-icon">3</div><span class="step-label">Packed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 3 ? 'active' : ''}"><div class="step-icon">4</div><span class="step-label">Shipped</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 4 ? 'completed' : ''}"><div class="step-icon">5</div><span class="step-label">Delivered</span></div>
+                    </div>
+
+                    <div style="font-size:0.9rem; color:var(--pjr-steel-grey); border-top:1px solid var(--pjr-light-grey); padding-top:1rem; margin-top:1rem;">
+                      <strong>Destination Address:</strong> ${order.address || (addresses[0] ? addresses[0].fullAddress : '')}
+                    </div>
+                  </div>
+
+                  <h4 style="margin-bottom:1rem;">Order Items</h4>
+                  <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                    ${order.items.map(item => `
+                      <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem; background:var(--pjr-pure-white); border:1px solid var(--pjr-light-grey); border-radius:var(--radius-sm);">
+                        <div>
+                          <div style="font-weight:700; color:var(--pjr-deep-navy); font-size:1rem;">${item.title}</div>
+                          <div style="font-size:0.85rem; color:var(--pjr-steel-grey);">Quantity: ${item.qty}</div>
+                        </div>
+                        <span style="font-weight:800; color:var(--pjr-teal); font-size:1.1rem;">₹${item.price.toLocaleString('en-IN')}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                ` : `
+                  <div style="text-align:center; padding:4rem 1rem;">
+                    <div style="font-size:3rem; margin-bottom:1rem;">📦</div>
+                    <h3 style="color:var(--pjr-deep-navy); margin-bottom:0.5rem;">No Active Orders</h3>
+                    <p class="text-muted" style="margin-bottom:1.5rem;">You have not placed any orders yet.</p>
+                    <a href="#new-arrivals" class="btn btn-teal">Start Shopping</a>
+                  </div>
+                `}
               </div>
             ` : ''}
 

@@ -48,14 +48,7 @@ class StateStore {
     this.selectedProduct = null;
     this.addressToEdit = null;
 
-    this.activeOrder = {
-      orderId: 'PJR-94821',
-      date: '2026-07-21',
-      status: 'shipped', // placed, confirmed, packed, shipped, delivered
-      items: [{ title: 'Minimalist Monogram Navy Blazer', price: 8999, qty: 1 }],
-      total: 10618,
-      addressId: 'addr-001'
-    };
+    this.activeOrder = null;
 
     if (typeof window !== 'undefined') {
       window.addEventListener('hashchange', () => {

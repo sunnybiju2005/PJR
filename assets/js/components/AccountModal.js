@@ -108,8 +108,8 @@ export function renderAccountModal() {
   const addresses = store.addresses;
   const wishlistProducts = store.products.filter(p => store.wishlist.includes(p.id));
   const steps = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
-  const currentStepIndex = steps.indexOf(order.status);
-  const progressPercent = (currentStepIndex / (steps.length - 1)) * 100;
+  const currentStepIndex = order ? steps.indexOf(order.status) : 0;
+  const progressPercent = order ? (currentStepIndex / (steps.length - 1)) * 100 : 0;
 
   return `
     <div class="modal-overlay active" id="accountModal">
@@ -157,17 +157,21 @@ export function renderAccountModal() {
             ${activeTab === 'orders' ? `
               <div>
                 <span class="section-subtitle">LIVE ORDER TRACKING</span>
-                <h3 style="margin-bottom:1.5rem;">Order #${order.orderId}</h3>
-                <div style="background:var(--pjr-bg-grey);padding:1.75rem;border-radius:var(--radius-md);border:1px solid var(--pjr-light-grey);">
-                  <div class="timeline-track">
-                    <div class="timeline-progress" style="width:${progressPercent}%;"></div>
-                    <div class="timeline-step ${currentStepIndex >= 0 ? 'completed' : ''}"><div class="step-icon">1</div><span class="step-label">Placed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 1 ? 'completed' : ''}"><div class="step-icon">2</div><span class="step-label">Confirmed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 2 ? 'completed' : ''}"><div class="step-icon">3</div><span class="step-label">Packed</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 3 ? 'active' : ''}"><div class="step-icon">4</div><span class="step-label">Shipped</span></div>
-                    <div class="timeline-step ${currentStepIndex >= 4 ? 'completed' : ''}"><div class="step-icon">5</div><span class="step-label">Delivered</span></div>
+                ${order ? `
+                  <h3 style="margin-bottom:1.5rem;">Order #${order.orderId}</h3>
+                  <div style="background:var(--pjr-bg-grey);padding:1.75rem;border-radius:var(--radius-md);border:1px solid var(--pjr-light-grey);">
+                    <div class="timeline-track">
+                      <div class="timeline-progress" style="width:${progressPercent}%;"></div>
+                      <div class="timeline-step ${currentStepIndex >= 0 ? 'completed' : ''}"><div class="step-icon">1</div><span class="step-label">Placed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 1 ? 'completed' : ''}"><div class="step-icon">2</div><span class="step-label">Confirmed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 2 ? 'completed' : ''}"><div class="step-icon">3</div><span class="step-label">Packed</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 3 ? 'active' : ''}"><div class="step-icon">4</div><span class="step-label">Shipped</span></div>
+                      <div class="timeline-step ${currentStepIndex >= 4 ? 'completed' : ''}"><div class="step-icon">5</div><span class="step-label">Delivered</span></div>
+                    </div>
                   </div>
-                </div>
+                ` : `
+                  <p class="text-muted" style="margin-top:1rem;">No active orders found.</p>
+                `}
               </div>
             ` : ''}
 

@@ -6,6 +6,15 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Allow public read access to catalog & store data for website frontend
+    match /products/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /categories/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /subcategories/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /brands/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /banners/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /offers/{docId} { allow read: if true; allow write: if request.auth != null; }
+    match /settings/{docId} { allow read: if true; allow write: if request.auth != null; }
     
     // By default, deny all other read/write access
     match /{document=**} {
