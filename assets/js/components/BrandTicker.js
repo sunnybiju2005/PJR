@@ -1,24 +1,23 @@
-/* PJR Featured Brands Component */
-import { store } from '../state.js';
+/* PJR Featured Brand Component — Single Brand PJR Collections Marquee */
 
 export function renderBrandTicker() {
-  // Duplicate array for infinite ticker loop
-  const brandsList = [...store.brands, ...store.brands];
+  // Duplicate PJR COLLECTIONS brand for seamless left-to-right infinite loop
+  const brandsList = Array(12).fill('PJR COLLECTIONS');
 
   return `
-    <section style="padding: 2.5rem 0; background: var(--pjr-deep-navy); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
-      <div class="container" style="margin-bottom:1rem; text-align:center;">
-        <span style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--pjr-teal-light); font-weight:700;">
-          FEATURED DESIGNER HOUSES & PARTNERS
+    <section class="brand-ticker-section" style="padding: 2rem 0; background: var(--pjr-deep-navy); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08); overflow:hidden;">
+      <div class="container" style="margin-bottom:0.75rem; text-align:center;">
+        <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.2em; color:var(--pjr-teal-light); font-weight:700;">
+          FEATURED BRAND HOUSE
         </span>
       </div>
 
       <div class="ticker-wrap">
-        <div class="ticker-content">
-          ${brandsList.map(brand => `
-            <div style="display:inline-flex; align-items:center; gap:0.75rem; color:var(--pjr-pure-white); font-family:var(--font-heading); font-size:1.4rem; font-weight:700; opacity:0.85; transition:opacity 0.3s ease;">
-              <span style="color:var(--pjr-teal);">✦</span>
-              <span>${brand.name.toUpperCase()}</span>
+        <div class="ticker-content-ltr">
+          ${brandsList.map(name => `
+            <div class="ticker-brand-item">
+              <span class="ticker-star">✦</span>
+              <span class="ticker-brand-name">${name}</span>
             </div>
           `).join('')}
         </div>

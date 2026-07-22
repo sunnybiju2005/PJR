@@ -78,7 +78,12 @@ export function renderNewArrivals() {
 }
 
 export function renderBestSellers() {
-  const bestSellers = store.products.filter(p => p.isBestSeller);
+  const bestSellers = store.products
+    .filter(p => Boolean(p.isBestSeller))
+    .sort((a, b) => (Number(a.bestSellerOrder) || 99) - (Number(b.bestSellerOrder) || 99))
+    .slice(0, 3);
+
+  const displayList = bestSellers.length > 0 ? bestSellers : store.products.slice(0, 3);
 
   return `
     <section class="section" id="best-sellers" style="background:var(--pjr-bg-grey);">
@@ -90,7 +95,7 @@ export function renderBestSellers() {
         </div>
 
         <div class="grid-3">
-          ${bestSellers.slice(0, 3).map(p => renderProductCard(p)).join('')}
+          ${displayList.map(p => renderProductCard(p)).join('')}
         </div>
       </div>
     </section>

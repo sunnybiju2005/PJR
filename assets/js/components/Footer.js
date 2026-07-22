@@ -1,77 +1,102 @@
+/* PJR Luxury Footer Component — Clean & Minimal Mobile Layout */
 import { store } from '../state.js';
 
 export function renderFooter() {
   const settings = store.settings || {};
   const storeName = settings.storeName || 'PJR';
   const tagline = settings.tagline || 'Multiple Brands & Perfect Fit';
-  const footerText = settings.footerText || 'PJR is a world-class fashion e-commerce destination curated for individuals who demand perfection, luxury craftsmanship, and flawless fit.';
-  const email = settings.email || 'support@pjr.com';
   const instagram = settings.instagram || 'https://instagram.com';
   const facebook = settings.facebook || 'https://facebook.com';
-  const whatsapp = settings.whatsappNumber ? `https://wa.me/${settings.whatsappNumber}` : 'https://wa.me/';
+  const whatsapp = settings.whatsappNumber
+    ? `https://wa.me/${settings.whatsappNumber}`
+    : 'https://wa.me/';
 
   return `
     <footer class="footer">
       <div class="container">
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:3rem; margin-bottom:3.5rem;">
-          <div>
-            <a href="#" class="brand-logo" style="margin-bottom:1rem;">
-              <span class="brand-name" style="color:var(--pjr-pure-white);">${storeName}</span>
+
+        <!-- Desktop & Mobile Main Footer Layout -->
+        <div class="footer-grid">
+
+          <!-- Brand & Story (always visible) -->
+          <div class="footer-col brand-col">
+            <a href="index.html" class="brand-logo" style="margin-bottom:0.75rem;">
+              <span class="brand-name" style="color:var(--pjr-pure-white); font-size:1.6rem;">${storeName}</span>
               <span class="brand-tagline">${tagline}</span>
             </a>
-            <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); line-height:1.6; margin-bottom:1.5rem;">
-              ${footerText}
+            <p class="footer-desc">
+              World-class luxury fashion destination curated for individuals who demand perfection, luxury craftsmanship, and flawless fit.
             </p>
-            <div style="display:flex; gap:1rem; font-size:1.2rem;">
-              ${instagram ? `<a href="${instagram}" target="_blank" title="Instagram">📸</a>` : ''}
-              ${facebook ? `<a href="${facebook}" target="_blank" title="Facebook">📘</a>` : ''}
-              ${whatsapp ? `<a href="${whatsapp}" target="_blank" title="WhatsApp">💬</a>` : ''}
-              ${email ? `<a href="mailto:${email}" title="Email">✉️</a>` : ''}
+
+            <!-- Social Icons — Instagram, WhatsApp, Facebook only -->
+            <div class="footer-social-icons">
+              <a href="${instagram}" target="_blank" title="Instagram" class="social-icon-btn" aria-label="Follow on Instagram">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                </svg>
+              </a>
+              <a href="${whatsapp}" target="_blank" title="WhatsApp" class="social-icon-btn" aria-label="Contact on WhatsApp">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                </svg>
+              </a>
+              <a href="${facebook}" target="_blank" title="Facebook" class="social-icon-btn" aria-label="Follow on Facebook">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+                </svg>
+              </a>
             </div>
           </div>
 
-          <div>
-            <h4 style="color:var(--pjr-pure-white); margin-bottom:1.2rem; font-size:1.1rem;">Customer Care</h4>
-            <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; font-size:0.9rem;">
-              <li><a href="#why-pjr">Return & Exchange Policy</a></li>
-              <li><a href="#why-pjr">Shipping & Delivery Info</a></li>
-              <li><a href="#why-pjr">PJR Perfect Fit Guide</a></li>
-              <li><a href="#account" id="footerOrderTrack">Track Your Order</a></li>
-              <li><a href="mailto:support@pjr.com">Help & VIP Support</a></li>
+          <!-- Customer Care — hidden on mobile via CSS -->
+          <div class="footer-col footer-col-hide-mobile">
+            <h4 class="footer-heading">Customer Care</h4>
+            <ul class="footer-links">
+              <li><a href="mens.html">Return &amp; Exchange</a></li>
+              <li><a href="womens.html">Shipping &amp; Express Delivery</a></li>
+              <li><a href="profile.html">Track Order Timeline</a></li>
+              <li><a href="mailto:support@pjr.com">Help &amp; VIP Support</a></li>
             </ul>
           </div>
 
-          <div>
-            <h4 style="color:var(--pjr-pure-white); margin-bottom:1.2rem; font-size:1.1rem;">Quick Links</h4>
-            <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; font-size:0.9rem;">
-              <li><a href="#categories">Men's Apparel</a></li>
-              <li><a href="#categories">Women's Couture</a></li>
-              <li><a href="#categories">Luxury Accessories</a></li>
-              <li><a href="#new-arrivals">New Arrivals</a></li>
-              <li><a href="#best-sellers">Best Sellers</a></li>
+          <!-- Shop Collections — hidden on mobile via CSS -->
+          <div class="footer-col footer-col-hide-mobile">
+            <h4 class="footer-heading">Collections</h4>
+            <ul class="footer-links">
+              <li><a href="mens.html">Men's Apparel</a></li>
+              <li><a href="womens.html">Women's Couture</a></li>
+              <li><a href="accessories.html">Luxury Accessories</a></li>
+              <li><a href="new-arrivals.html">New Arrivals</a></li>
+              <li><a href="best-sellers.html">Best Sellers</a></li>
             </ul>
           </div>
 
-          <div>
-            <h4 style="color:var(--pjr-pure-white); margin-bottom:1.2rem; font-size:1.1rem;">Legal & Policy</h4>
-            <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; font-size:0.9rem;">
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Security & Encryption</a></li>
-              <li><a href="#">Razorpay Partner Policy</a></li>
+          <!-- Legal Policies — hidden on mobile via CSS -->
+          <div class="footer-col footer-col-hide-mobile">
+            <h4 class="footer-heading">Legal</h4>
+            <ul class="footer-links">
+              <li><a href="index.html">Privacy Policy</a></li>
+              <li><a href="index.html">Terms &amp; Conditions</a></li>
+              <li><a href="index.html">SSL Encryption</a></li>
             </ul>
+          </div>
+
+        </div>
+
+        <!-- Bottom Copyright Row -->
+        <div class="footer-bottom-bar">
+          <div class="footer-copyright">
+            © 2026 <strong>PJR Collections</strong>. All Rights Reserved.
+          </div>
+          <!-- Trust badges — hidden on mobile via CSS -->
+          <div class="footer-trust-badges footer-trust-badges-hide-mobile">
+            <span>🔒 256-Bit SSL Encrypted</span>
+            <span>⚡ Express Priority Dispatch</span>
           </div>
         </div>
 
-        <div style="padding-top:2rem; border-top:1px solid rgba(255,255,255,0.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:1rem; font-size:0.85rem; color:rgba(255,255,255,0.6);">
-          <div>
-            © 2026 <strong>PJR – Multiple Brands & Perfect Fit</strong>. All Rights Reserved.
-          </div>
-          <div style="display:flex; align-items:center; gap:1rem;">
-            <span>Powered by Shared Firebase Backend & Razorpay</span>
-            <span>🔒 SSL Encrypted</span>
-          </div>
-        </div>
       </div>
     </footer>
   `;

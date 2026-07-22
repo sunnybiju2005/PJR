@@ -14,6 +14,7 @@ class StateStore {
     this.brands = [];
     this.offers = [];
     this.products = [];
+    this.editorials = []; // Trending/Visual Editorial section items
 
     this.cart = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_cart')) ? JSON.parse(localStorage.getItem('pjr_cart')) : [];
 
@@ -153,7 +154,7 @@ class StateStore {
         size,
         color: typeof color === 'string' ? color : (color.name || 'Default'),
         quantity: qty,
-        image: product.images[0]
+        image: (product.imageUrls || product.images || [])[0] || ''
       });
     }
     this.notify();
@@ -214,22 +215,68 @@ class StateStore {
 
   getFilteredProducts() {
     return this.products.filter(p => {
-      if (this.filters.gender !== 'all' && p.gender !== this.filters.gender) return false;
-      if (this.filters.subcategory !== 'all' && p.category !== this.filters.subcategory) return false;
-      if (this.filters.brand !== 'all' && p.brand.toLowerCase() !== this.filters.brand.toLowerCase()) return false;
-      if (p.price < this.filters.priceMin || p.price > this.filters.priceMax) return false;
-      if (this.filters.rating > 0 && p.rating < this.filters.rating) return false;
+      // 1. Gender filter (case-insensitive & alias handling)
+      if (this.filters.gender !== 'all') {
+        const pGender = (p.gender || p.targetGender || p.categoryGroup || '').toString().toLowerCase();
+        const fGender = this.filters.gender.toLowerCase();
+        const isMenMatch = (fGender === 'men' && (pGender === 'men' || pGender === 'man' || pGender === 'male'));
+        const isWomenMatch = (fGender === 'women' && (pGender === 'women' || pGender === 'woman' || pGender === 'female'));
+        const isAccessoryMatch = (fGender === 'accessories' && (pGender === 'accessories' || pGender === 'accessory'));
+        if (!isMenMatch && !isWomenMatch && !isAccessoryMatch && pGender !== fGender) {
+          return false;
+        }
+      }
+
+      // 2. Subcategory / Category filter (case-insensitive & alias handling)
+      if (this.filters.subcategory !== 'all') {
+        const pSub = (p.category || p.subcategory || p.subCategory || p.categoryId || '').toString().toLowerCase();
+        const fSub = this.filters.subcategory.toLowerCase();
+        if (pSub !== fSub && !pSub.includes(fSub)) {
+          return false;
+        }
+      }
+
+      // 3. Brand filter (case-insensitive)
+      if (this.filters.brand !== 'all') {
+        const pBrand = (p.brand || p.brandName || '').toString().toLowerCase();
+        const fBrand = this.filters.brand.toLowerCase();
+        if (pBrand !== fBrand) {
+          return false;
+        }
+      }
+
+      // 4. Price filter
+      const price = Number(p.price || 0);
+      if (price < this.filters.priceMin || price > this.filters.priceMax) {
+        return false;
+      }
+
+      // 5. Rating filter
+      const rating = Number(p.rating || 5);
+      if (this.filters.rating > 0 && rating < this.filters.rating) {
+        return false;
+      }
+
+      // 6. Search query filter
       if (this.filters.search.trim()) {
         const query = this.filters.search.toLowerCase();
-        const matchTitle = p.title.toLowerCase().includes(query);
-        const matchBrand = p.brand.toLowerCase().includes(query);
-        if (!matchTitle && !matchBrand) return false;
+        const title = (p.title || p.name || p.productName || '').toString().toLowerCase();
+        const brand = (p.brand || p.brandName || '').toString().toLowerCase();
+        const desc = (p.description || '').toString().toLowerCase();
+        if (!title.includes(query) && !brand.includes(query) && !desc.includes(query)) {
+          return false;
+        }
       }
+
       return true;
     }).sort((a, b) => {
-      if (this.filters.sortBy === 'price-low') return a.price - b.price;
-      if (this.filters.sortBy === 'price-high') return b.price - a.price;
-      if (this.filters.sortBy === 'rating') return b.rating - a.rating;
+      const priceA = Number(a.price || 0);
+      const priceB = Number(b.price || 0);
+      if (this.filters.sortBy === 'price-low') return priceA - priceB;
+      if (this.filters.sortBy === 'price-high') return priceB - priceA;
+      const ratingA = Number(a.rating || 5);
+      const ratingB = Number(b.rating || 5);
+      if (this.filters.sortBy === 'rating') return ratingB - ratingA;
       return 0;
     });
   }

@@ -1,4 +1,3 @@
-/* PJR Main Application Entry Point for Dedicated Standalone HTML Pages */
 import { renderNavbar, initNavbarEvents } from './components/Navbar.js';
 import { renderProductModal, initProductModalEvents } from './components/ProductModal.js';
 import { renderCartDrawer, initCartEvents } from './components/CartDrawer.js';
@@ -15,6 +14,7 @@ import { initMasonryEvents } from './components/Masonry.js';
 import { initCategoryPageEvents } from './pages/CategoryPage.js';
 import { initProfilePageEvents } from './pages/ProfilePage.js';
 import { initCartPageEvents } from './pages/CartPage.js';
+import { initWishlistPageEvents } from './pages/WishlistPage.js';
 import { store } from './state.js';
 import { auth, db, doc, setDoc, getDoc, onAuthStateChanged, getRedirectResult } from './firebaseConfig.js';
 
@@ -59,6 +59,7 @@ if (typeof document !== 'undefined') {
     initCategoryPageEvents();
     initProfilePageEvents();
     initCartPageEvents();
+    initWishlistPageEvents();
     initProductModalEvents();
     initCartEvents();
     initCheckoutEvents();

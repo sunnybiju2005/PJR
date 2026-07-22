@@ -301,15 +301,14 @@ section {
   color: var(--pjr-steel-grey);
 }
 
-/* Responsive */
+/* Responsive — Tablet */
 @media (max-width: 992px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
   .nav-menu { display: none; }
 }
 
-@media (max-width: 600px) {
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  section { padding: 3rem 0; }
-  .hero-content { text-align: center; }
+/* Responsive — Desktop show hamburger control */
+@media (max-width: 768px) {
+  .hamburger-btn { display: flex !important; }
 }

@@ -21,6 +21,11 @@
   100% { transform: translateX(-50%); }
 }
 
+@keyframes tickerScrollLeftToRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -48,8 +53,35 @@
   animation: tickerScroll 25s linear infinite;
 }
 
-.ticker-wrap:hover .ticker-content {
+.ticker-content-ltr {
+  display: inline-flex;
+  align-items: center;
+  gap: 3rem;
+  animation: tickerScrollLeftToRight 22s linear infinite;
+  will-change: transform;
+}
+
+.ticker-wrap:hover .ticker-content,
+.ticker-wrap:hover .ticker-content-ltr {
   animation-play-state: paused;
+}
+
+.ticker-brand-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: var(--pjr-pure-white);
+  font-family: var(--font-heading);
+  font-size: clamp(1.1rem, 3.5vw, 1.45rem);
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  opacity: 0.9;
+  white-space: nowrap;
+}
+
+.ticker-star {
+  color: var(--pjr-teal);
+  font-size: 0.85rem;
 }
 
 /* Skeleton Loading */
