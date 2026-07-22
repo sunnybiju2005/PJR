@@ -1,17 +1,10 @@
-/* PJR Shop By Category Component */
+/* PJR Shop By Category Component — Dynamic from Firestore homeimages collection */
 import { store } from '../state.js';
 
 export function renderCategories() {
-  const fallbackImages = {
-    men:         'assets/images/hero-men.png',
-    women:       'assets/images/hero-women.png',
-    accessories: 'assets/images/hero-accessories.png',
-  };
-
-  // High-quality Unsplash fallbacks (used when Firestore image is empty)
   const unsplashFallbacks = {
-    men:         'assets/images/hero-men.png',
-    women:       'assets/images/hero-women.png',
+    men:         'https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?w=800&auto=format&fit=crop&q=80',
+    women:       'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80',
     accessories: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80',
   };
 
@@ -23,7 +16,7 @@ export function renderCategories() {
     { id: 'accessories', name: 'Luxury Accessories',   count: '64 Items',  subtitle: 'Swiss Watches & Leather Goods'  }
   ];
 
-  // Sort by enforced order map (unknown items go to end)
+  // Sort by enforced order map
   cats = cats.sort((a, b) => {
     const ai = orderMap[a.id] ?? 99;
     const bi = orderMap[b.id] ?? 99;
@@ -42,17 +35,29 @@ export function renderCategories() {
         <div class="category-cards-grid">
           ${cats.map((cat, idx) => {
             const catId = (cat.id || '').toString().toLowerCase().trim();
-            const localImg = cat.imageUrl?.trim() || cat.image?.trim() || '';
-            const imgSrc = localImg !== ''
-              ? localImg
-              : (unsplashFallbacks[catId] || fallbackImages[catId] || 'assets/images/hero-men.png');
+
+            // Priority 1: Check store.homepageContent (homeimages/menwear, womenwear, accessories)
+            const homeContentImg = store.homepageContent ? store.homepageContent.getCategoryImageUrl(catId) : '';
+            
+            // Priority 2: Check store.categories
+            const catStoreImg = cat.imageUrl?.trim() || cat.image?.trim() || '';
+
+            // Priority 3: Fallback
+            const fallbackImg = unsplashFallbacks[catId] || unsplashFallbacks.men;
+
+            const finalImgSrc = homeContentImg || catStoreImg || fallbackImg;
 
             // Third card (Accessories) gets a special class for mobile centering
             const extraClass = idx === 2 ? 'category-card-center' : '';
 
             return `
               <div class="category-card ${extraClass}" data-category="${catId}">
-                <img src="${imgSrc}" alt="${cat.name || 'Category'} Collection" loading="lazy" />
+                <img
+                  src="${finalImgSrc}"
+                  alt="${cat.name || 'Category'} Collection"
+                  loading="lazy"
+                  onerror="this.onerror=null; this.src='${fallbackImg}';"
+                />
                 <div class="category-content">
                   <span class="badge badge-teal" style="width:fit-content; margin-bottom:0.4rem;">${cat.count || 'View All'}</span>
                   <h3 style="color:var(--pjr-pure-white); margin-bottom:0.2rem; font-size:1.25rem;">${cat.name}</h3>

@@ -1,12 +1,15 @@
-/* PJR Central Reactive State Store & Multi-Address Store */
 import { firestoreService } from './services/firestoreService.js';
+import { homepageContentService } from './services/homepageContentService.js';
+import { HomepageContentModel } from './models/HomepageContentModel.js';
 
 class StateStore {
   constructor() {
     this.listeners = new Set();
     this.route = typeof window !== 'undefined' ? (window.location.hash || '#home') : '#home';
 
-    // Dynamic Firebase Collections
+    // Dynamic Firebase Collections & Homepage Model
+    this.homepageContent = new HomepageContentModel();
+    this.isHomepageContentLoading = true;
     this.settings = {};
     this.banners = [];
     this.categories = [];
@@ -15,6 +18,10 @@ class StateStore {
     this.offers = [];
     this.products = [];
     this.editorials = []; // Trending/Visual Editorial section items
+    this.homeimages = {};
+    this.heroImageUrl = '';
+    this.heroData = null;
+    this.isHeroLoading = true;
 
     this.cart = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_cart')) ? JSON.parse(localStorage.getItem('pjr_cart')) : [];
 
@@ -62,6 +69,7 @@ class StateStore {
     // Start Realtime Sync
     if (typeof window !== 'undefined') {
       firestoreService.initializeRealtimeSync();
+      homepageContentService.initializeListeners();
     }
   }
 

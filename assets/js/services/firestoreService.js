@@ -12,6 +12,44 @@ class FirestoreService {
 
   // Starts real-time listeners for all necessary collections
   initializeRealtimeSync() {
+    // 1. Direct listener for homeimages/heroimage document
+    try {
+      const heroDocRef = doc(db, 'homeimages', 'heroimage');
+      const unsubHero = onSnapshot(heroDocRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          store.heroData = { id: snap.id, ...data };
+          store.heroImageUrl = data.url || data.imageUrl || data.image || data.heroImage || '';
+        } else {
+          store.heroData = null;
+        }
+        store.isHeroLoading = false;
+        store.notify();
+      }, (error) => {
+        console.warn('[FirestoreService] Warning syncing homeimages/heroimage doc:', error);
+        store.isHeroLoading = false;
+        store.notify();
+      });
+      this.unsubscribers.push(unsubHero);
+    } catch (e) {
+      console.warn('[FirestoreService] heroDocRef setup failed:', e);
+    }
+
+    // 2. Collection listener for homeimages
+    this.syncCollection('homeimages', (data) => {
+      if (data && data.length > 0) {
+        const heroDoc = data.find(d => d.id === 'heroimage' || d.id === 'hero') || data[0];
+        const url = heroDoc.url || heroDoc.imageUrl || heroDoc.image || heroDoc.heroImage || '';
+        if (url) {
+          store.heroImageUrl = url;
+        }
+        store.homeimages = heroDoc;
+        if (!store.heroData) store.heroData = heroDoc;
+      }
+      store.isHeroLoading = false;
+      store.notify();
+    });
+
     this.syncCollection('settings', (data) => {
       if (data.length > 0) store.settings = data[0];
       store.notify();
@@ -116,9 +154,15 @@ class FirestoreService {
             rating: Number(p.rating || 4.8),
             reviewsCount: Number(p.reviewsCount || p.reviewCount || 12),
             isNew: p.isNew !== undefined ? p.isNew : true,
-            isBestSeller: p.isBestSeller !== undefined ? Boolean(p.isBestSeller) : Boolean(p.featured),
-            bestSellerOrder: Number(p.bestSellerOrder || p.bestSellerPosition || 99),
-            isTrending: p.isTrending !== undefined ? Boolean(p.isTrending) : false,
+            isBestSeller: Boolean(p.isBestSeller === true || p.isBestseller === true || p.bestSeller === true || p.bestseller === true),
+            bestSellerOrder: Number(
+              p.bestSellerOrder !== undefined ? p.bestSellerOrder :
+              (p.bestSellerPosition !== undefined ? p.bestSellerPosition :
+              (p.bestSellerRank !== undefined ? p.bestSellerRank :
+              (p.position !== undefined ? p.position :
+              (p.order !== undefined ? p.order : 99))))
+            ),
+            isTrending: Boolean(p.isTrending === true || p.isTrendingCollection === true || p.trending === true || p.trendingCollection === true),
             images: finalImages,
             imageUrls: finalImages,
             sizes: Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L', 'XL'],

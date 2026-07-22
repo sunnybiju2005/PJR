@@ -83,7 +83,9 @@ export function renderBestSellers() {
     .sort((a, b) => (Number(a.bestSellerOrder) || 99) - (Number(b.bestSellerOrder) || 99))
     .slice(0, 3);
 
-  const displayList = bestSellers.length > 0 ? bestSellers : store.products.slice(0, 3);
+  if (bestSellers.length === 0) {
+    return '';
+  }
 
   return `
     <section class="section" id="best-sellers" style="background:var(--pjr-bg-grey);">
@@ -94,8 +96,12 @@ export function renderBestSellers() {
           <p class="text-muted">The most coveted fashion pieces loved by our luxury community.</p>
         </div>
 
-        <div class="grid-3">
-          ${displayList.map(p => renderProductCard(p)).join('')}
+        <div style="display:flex; justify-content:center; gap:1.5rem; flex-wrap:wrap;">
+          ${bestSellers.map(p => `
+            <div style="flex:1 1 280px; max-width:350px;">
+              ${renderProductCard(p)}
+            </div>
+          `).join('')}
         </div>
       </div>
     </section>

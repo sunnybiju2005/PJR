@@ -1,9 +1,8 @@
-/* PJR Trending Collection — Editorial Masonry Layout */
+/* PJR Trending Collection — Editorial Masonry Layout (Strict Dynamic isTrending) */
 import { store } from '../state.js';
 
 /**
  * Grid layout patterns for the masonry tiles.
- * Cycles through these for visual variety.
  */
 const TILE_LAYOUTS = [
   { class: 'tall', badge: 'TRENDING' },
@@ -15,21 +14,15 @@ const TILE_LAYOUTS = [
 export function renderMasonry() {
   const allProducts = store.products || [];
 
-  // Use products explicitly marked as Trending by Admin App
-  let trendingProducts = allProducts.filter(p => Boolean(p.isTrending));
+  // Strictly filter products marked as Trending in Admin App
+  const trendingProducts = allProducts.filter(p => Boolean(p.isTrending));
 
-  // Graceful fallback: if Admin hasn't marked any products as Trending yet,
-  // show the first 4 newest products so the section is never empty
-  if (trendingProducts.length === 0) {
-    trendingProducts = allProducts.slice(0, 4);
-  }
-
-  // Still nothing (store not loaded yet) — hide section
+  // If no products are marked as Trending by admin, do not display the section
   if (trendingProducts.length === 0) {
     return '';
   }
 
-  // Limit to 4 tiles for the masonry grid to keep the layout balanced
+  // Limit to 4 tiles for the masonry layout
   const tiles = trendingProducts.slice(0, 4);
 
   return `
@@ -43,7 +36,7 @@ export function renderMasonry() {
 
         <div class="masonry-grid">
           ${tiles.map((p, idx) => {
-            const layout = TILE_LAYOUTS[idx] || TILE_LAYOUTS[0];
+            const layout = TILE_LAYOUTS[idx % TILE_LAYOUTS.length];
             const img = (p.imageUrls || p.images || [])[0] || 'assets/images/hero-men.png';
             const priceStr = p.price ? `₹${Number(p.price).toLocaleString('en-IN')}` : '';
 

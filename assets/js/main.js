@@ -22,6 +22,12 @@ function renderApp() {
   const appEl = document.getElementById('app');
   if (!appEl) return;
 
+  // Track active input focus state before re-render
+  const activeInput = document.activeElement;
+  const isSearchFocused = activeInput && activeInput.id === 'liveSearchInput';
+  const selectionStart = isSearchFocused ? activeInput.selectionStart : null;
+  const selectionEnd = isSearchFocused ? activeInput.selectionEnd : null;
+
   const activePage = getActivePageName();
 
   appEl.innerHTML = `
@@ -38,7 +44,16 @@ function renderApp() {
     ${renderSearchDrawer()}
   `;
 
-  // Event handlers have been moved to DOMContentLoaded to prevent duplicate bindings.
+  // Restore search input focus if search drawer was active
+  if (isSearchFocused) {
+    const newSearchInput = document.getElementById('liveSearchInput');
+    if (newSearchInput) {
+      newSearchInput.focus();
+      if (selectionStart !== null && selectionEnd !== null) {
+        newSearchInput.setSelectionRange(selectionStart, selectionEnd);
+      }
+    }
+  }
 
   // Initialize interactive Leaflet Map if address modal is open
   if (store.activeModal === 'editAddress') {
