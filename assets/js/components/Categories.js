@@ -1,5 +1,4 @@
 /* PJR Shop By Category Component */
-import { CATEGORIES } from '../mockData.js';
 import { store } from '../state.js';
 
 export function renderCategories() {
@@ -13,7 +12,7 @@ export function renderCategories() {
         </div>
 
         <div class="grid-3">
-          ${CATEGORIES.map(cat => `
+          ${store.categories.map(cat => `
             <div class="category-card" data-category="${cat.id}">
               <img src="${cat.image}" alt="${cat.name} Collection" />
               <div class="category-content">

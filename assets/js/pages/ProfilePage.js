@@ -1,6 +1,6 @@
 /* PJR Dedicated Customer Profile & Address Management Page */
 import { store } from '../state.js';
-import { PRODUCTS } from '../mockData.js';
+
 import { renderAddressCard } from '../components/AddressManager.js';
 import { auth, signOut } from '../firebaseConfig.js';
 
@@ -25,7 +25,7 @@ export function renderProfilePage() {
 
   const addresses = store.addresses;
   const order = store.activeOrder;
-  const wishlistProducts = PRODUCTS.filter(p => store.wishlist.includes(p.id));
+  const wishlistProducts = store.products.filter(p => store.wishlist.includes(p.id));
 
   const steps = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
   const currentStepIndex = steps.indexOf(order.status);

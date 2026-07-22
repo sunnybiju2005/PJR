@@ -16,7 +16,7 @@ import { initCategoryPageEvents } from './pages/CategoryPage.js';
 import { initProfilePageEvents } from './pages/ProfilePage.js';
 import { initCartPageEvents } from './pages/CartPage.js';
 import { store } from './state.js';
-import { auth, onAuthStateChanged, getRedirectResult } from './firebaseConfig.js';
+import { auth, db, doc, setDoc, getDoc, onAuthStateChanged, getRedirectResult } from './firebaseConfig.js';
 
 function renderApp() {
   const appEl = document.getElementById('app');
@@ -38,21 +38,7 @@ function renderApp() {
     ${renderSearchDrawer()}
   `;
 
-  // Attach event handlers
-  initNavbarEvents();
-  initHeroEvents();
-  initCategoryEvents();
-  initProductEvents();
-  initMasonryEvents();
-  initCategoryPageEvents();
-  initProfilePageEvents();
-  initCartPageEvents();
-  initProductModalEvents();
-  initCartEvents();
-  initCheckoutEvents();
-  initAccountEvents();
-  initAddressEvents();
-  initSearchEvents();
+  // Event handlers have been moved to DOMContentLoaded to prevent duplicate bindings.
 
   // Initialize interactive Leaflet Map if address modal is open
   if (store.activeModal === 'editAddress') {
@@ -64,6 +50,22 @@ function renderApp() {
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', () => {
+    // Attach event handlers ONCE to prevent duplicate listeners
+    initNavbarEvents();
+    initHeroEvents();
+    initCategoryEvents();
+    initProductEvents();
+    initMasonryEvents();
+    initCategoryPageEvents();
+    initProfilePageEvents();
+    initCartPageEvents();
+    initProductModalEvents();
+    initCartEvents();
+    initCheckoutEvents();
+    initAccountEvents();
+    initAddressEvents();
+    initSearchEvents();
+
     renderApp();
 
     // Handle Google redirect result (when popup was blocked & redirect was used)
@@ -74,11 +76,32 @@ if (typeof document !== 'undefined') {
     });
 
     // 🔥 Firebase Auth State — auto login/logout when Firebase auth changes
-    onAuthStateChanged(auth, (firebaseUser) => {
+    onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const name = firebaseUser.displayName || firebaseUser.email.split('@')[0];
-        store.login(name, firebaseUser.email);
-        store.closeModal();
+        try {
+          const userRef = doc(db, 'users', firebaseUser.uid);
+          const userSnap = await getDoc(userRef);
+          let userData = {
+            name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'User'),
+            email: firebaseUser.email || '',
+            createdAt: new Date().toISOString()
+          };
+          
+          if (!userSnap.exists()) {
+            await setDoc(userRef, userData, { merge: true });
+          } else {
+            userData = { ...userData, ...userSnap.data() };
+          }
+
+          store.login(userData.name, userData.email);
+          store.closeModal();
+        } catch (err) {
+          console.error("Firestore Error:", err);
+          // Fallback login if firestore fails
+          const name = firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'User');
+          store.login(name, firebaseUser.email || '');
+          store.closeModal();
+        }
       } else {
         store.user = { name: '', email: '', isLoggedIn: false };
         localStorage.removeItem('pjr_user');

@@ -1,23 +1,32 @@
-/* PJR Luxury Footer Component */
+import { store } from '../state.js';
 
 export function renderFooter() {
+  const settings = store.settings || {};
+  const storeName = settings.storeName || 'PJR';
+  const tagline = settings.tagline || 'Multiple Brands & Perfect Fit';
+  const footerText = settings.footerText || 'PJR is a world-class fashion e-commerce destination curated for individuals who demand perfection, luxury craftsmanship, and flawless fit.';
+  const email = settings.email || 'support@pjr.com';
+  const instagram = settings.instagram || 'https://instagram.com';
+  const facebook = settings.facebook || 'https://facebook.com';
+  const whatsapp = settings.whatsappNumber ? `https://wa.me/${settings.whatsappNumber}` : 'https://wa.me/';
+
   return `
     <footer class="footer">
       <div class="container">
         <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:3rem; margin-bottom:3.5rem;">
           <div>
             <a href="#" class="brand-logo" style="margin-bottom:1rem;">
-              <span class="brand-name" style="color:var(--pjr-pure-white);">PJR</span>
-              <span class="brand-tagline">Multiple Brands & Perfect Fit</span>
+              <span class="brand-name" style="color:var(--pjr-pure-white);">${storeName}</span>
+              <span class="brand-tagline">${tagline}</span>
             </a>
             <p style="font-size:0.9rem; color:rgba(255,255,255,0.7); line-height:1.6; margin-bottom:1.5rem;">
-              PJR is a world-class fashion e-commerce destination curated for individuals who demand perfection, luxury craftsmanship, and flawless fit.
+              ${footerText}
             </p>
             <div style="display:flex; gap:1rem; font-size:1.2rem;">
-              <a href="https://instagram.com" target="_blank" title="Instagram">📸</a>
-              <a href="https://facebook.com" target="_blank" title="Facebook">📘</a>
-              <a href="https://wa.me/" target="_blank" title="WhatsApp">💬</a>
-              <a href="mailto:support@pjr.com" title="Email">✉️</a>
+              ${instagram ? `<a href="${instagram}" target="_blank" title="Instagram">📸</a>` : ''}
+              ${facebook ? `<a href="${facebook}" target="_blank" title="Facebook">📘</a>` : ''}
+              ${whatsapp ? `<a href="${whatsapp}" target="_blank" title="WhatsApp">💬</a>` : ''}
+              ${email ? `<a href="mailto:${email}" title="Email">✉️</a>` : ''}
             </div>
           </div>
 

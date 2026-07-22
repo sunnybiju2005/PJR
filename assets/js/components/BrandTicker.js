@@ -1,9 +1,9 @@
 /* PJR Featured Brands Component */
-import { BRANDS } from '../mockData.js';
+import { store } from '../state.js';
 
 export function renderBrandTicker() {
   // Duplicate array for infinite ticker loop
-  const brandsList = [...BRANDS, ...BRANDS];
+  const brandsList = [...store.brands, ...store.brands];
 
   return `
     <section style="padding: 2.5rem 0; background: var(--pjr-deep-navy); border-top:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">

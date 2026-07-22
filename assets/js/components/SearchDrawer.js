@@ -1,6 +1,6 @@
 /* PJR Instant Search & Multi-Filter Drawer Component */
 import { store } from '../state.js';
-import { BRANDS } from '../mockData.js';
+
 
 export function renderSearchDrawer() {
   const isOpen = store.activeModal === 'search';
@@ -35,12 +35,11 @@ export function renderSearchDrawer() {
           <!-- Brand Selector -->
           <div class="form-group">
             <label class="form-label">Fashion Brand</label>
-            <select class="form-input" id="brandSelect">
-              <option value="all">All Designer Houses</option>
-              ${BRANDS.map(b => `
-                <option value="${b.name}" ${store.filters.brand.toLowerCase() === b.name.toLowerCase() ? 'selected' : ''}>${b.name}</option>
+            <div class="search-brands-grid">
+              ${store.brands.slice(0, 4).map(b => `
+                <button class="search-brand-btn" data-brand="${b.name.toLowerCase()}">${b.name}</button>
               `).join('')}
-            </select>
+            </div>
           </div>
 
           <!-- Sort Selector -->

@@ -2,40 +2,37 @@
 import { store } from '../state.js';
 
 export function renderHero() {
+  const banners = store.banners;
+  const activeBanners = banners.length > 0 ? banners : [
+    { image: 'assets/images/hero-men.png', title: 'STYLE THAT FITS YOU PERFECTLY', subtitle: 'SPRING / SUMMER 2026 EDITION', description: 'Premium Brands. Perfect Fit. Fashion for Everyone. Elevate your wardrobe with curated Italian tailoring and haute couture.' },
+    { image: 'assets/images/hero-women.png', title: 'HAUTE COUTURE & ELEGANCE', subtitle: 'SPRING / SUMMER 2026 EDITION', description: 'Experience silk draped gowns and luxury womenswear.' },
+    { image: 'assets/images/hero-accessories.png', title: 'FINE WATCHES & ACCESSORIES', subtitle: 'SPRING / SUMMER 2026 EDITION', description: 'Precision timepieces and handcrafted leather goods.' }
+  ];
+
+  const firstBanner = activeBanners[0];
+
   return `
     <section class="hero-section" id="hero">
       <div class="hero-slider-bg">
-        <div class="hero-slide active">
-          <img src="assets/images/hero-men.png" alt="PJR Men's Luxury Fashion" />
-          <div class="hero-overlay"></div>
-        </div>
-        <div class="hero-slide">
-          <img src="assets/images/hero-women.png" alt="PJR Women's Luxury Collection" />
-          <div class="hero-overlay"></div>
-        </div>
-        <div class="hero-slide">
-          <img src="assets/images/hero-accessories.png" alt="PJR High-End Accessories" />
-          <div class="hero-overlay"></div>
-        </div>
+        ${activeBanners.map((b, idx) => `
+          <div class="hero-slide ${idx === 0 ? 'active' : ''}">
+            <img src="${b.image}" alt="${b.title || 'PJR Banner'}" />
+            <div class="hero-overlay"></div>
+          </div>
+        `).join('')}
       </div>
 
       <div class="container hero-content animate-fade-in">
-        <span class="section-subtitle" style="color:var(--pjr-teal-light);">SPRING / SUMMER 2026 EDITION</span>
-        <h1 style="color:var(--pjr-pure-white); margin-bottom:1.2rem;">STYLE THAT FITS YOU PERFECTLY</h1>
+        <span class="section-subtitle" style="color:var(--pjr-teal-light);">${firstBanner.subtitle || 'EXCLUSIVE COLLECTION'}</span>
+        <h1 style="color:var(--pjr-pure-white); margin-bottom:1.2rem;">${firstBanner.title || 'STYLE THAT FITS YOU PERFECTLY'}</h1>
         <p style="font-size:1.2rem; color:rgba(255,255,255,0.85); margin-bottom:2.2rem; max-width:520px;">
-          Premium Brands. Perfect Fit. Fashion for Everyone. Elevate your wardrobe with curated Italian tailoring and haute couture.
+          ${firstBanner.description || 'Premium Brands. Perfect Fit. Fashion for Everyone.'}
         </p>
 
         <div style="display:flex; gap:1rem; flex-wrap:wrap;">
           <a href="#new-arrivals" class="btn btn-teal" id="heroShopMen">
-            Shop Men
+            Shop Collection
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-          </a>
-          <a href="#new-arrivals" class="btn btn-outline-white" id="heroShopWomen">
-            Shop Women
-          </a>
-          <a href="#why-pjr" class="btn btn-outline-white" style="border:none;">
-            Learn More
           </a>
         </div>
       </div>

@@ -1,6 +1,6 @@
 /* PJR New Arrivals & Best Sellers Product Grid Components */
 import { store } from '../state.js';
-import { PRODUCTS } from '../mockData.js';
+
 
 export function renderProductCard(product) {
   const isWishlist = store.isInWishlist(product.id);
@@ -49,7 +49,7 @@ export function renderProductCard(product) {
 
 export function renderNewArrivals() {
   const filtered = store.getFilteredProducts();
-  const productsToShow = filtered.length > 0 ? filtered : PRODUCTS;
+  const productsToShow = filtered.length > 0 ? filtered : store.products;
 
   return `
     <section class="section" id="new-arrivals">
@@ -78,7 +78,7 @@ export function renderNewArrivals() {
 }
 
 export function renderBestSellers() {
-  const bestSellers = PRODUCTS.filter(p => p.isBestSeller);
+  const bestSellers = store.products.filter(p => p.isBestSeller);
 
   return `
     <section class="section" id="best-sellers" style="background:var(--pjr-bg-grey);">
@@ -102,7 +102,7 @@ export function initProductEvents() {
     const qvBtn = e.target.closest('.quick-view-btn');
     if (qvBtn) {
       const pId = qvBtn.dataset.qvId;
-      const product = PRODUCTS.find(p => p.id === pId);
+      const product = store.products.find(p => p.id === pId);
       if (product) store.openModal('quickView', product);
       return;
     }
@@ -110,7 +110,7 @@ export function initProductEvents() {
     const cartBtn = e.target.closest('.add-cart-btn');
     if (cartBtn) {
       const pId = cartBtn.dataset.cartId;
-      const product = PRODUCTS.find(p => p.id === pId);
+      const product = store.products.find(p => p.id === pId);
       if (product) {
         store.addToCart(product);
         store.openModal('cart');

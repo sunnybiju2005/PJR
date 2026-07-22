@@ -24,14 +24,28 @@ export function renderCheckoutModal() {
         </div>
 
         <!-- Progress Steps -->
-        <div style="display:flex; justify-content:space-between; margin-bottom:2rem; position:relative;">
-          <div style="position:absolute; top:12px; left:0; right:0; height:2px; background:var(--pjr-light-grey); z-index:1;"></div>
-          <div style="position:absolute; top:12px; left:0; width:${(currentStep - 1) * 33.3}%; height:2px; background:var(--pjr-teal); z-index:1; transition:width 0.4s ease;"></div>
-
-          <div class="step-badge ${currentStep >= 1 ? 'active' : ''}">1. Account</div>
-          <div class="step-badge ${currentStep >= 2 ? 'active' : ''}">2. Saved Address</div>
-          <div class="step-badge ${currentStep >= 3 ? 'active' : ''}">3. Razorpay</div>
-          <div class="step-badge ${currentStep >= 4 ? 'active' : ''}">4. Success</div>
+        <div class="timeline-track" style="margin-bottom:2.5rem; margin-top:0.5rem;">
+          <div class="timeline-progress" style="width:${(currentStep - 1) * 33.3}%;"></div>
+          
+          <div class="timeline-step ${currentStep >= 1 ? (currentStep === 1 ? 'active' : 'completed') : ''}">
+            <div class="step-icon">1</div>
+            <span class="step-label">Account</span>
+          </div>
+          
+          <div class="timeline-step ${currentStep >= 2 ? (currentStep === 2 ? 'active' : 'completed') : ''}">
+            <div class="step-icon">2</div>
+            <span class="step-label">Address</span>
+          </div>
+          
+          <div class="timeline-step ${currentStep >= 3 ? (currentStep === 3 ? 'active' : 'completed') : ''}">
+            <div class="step-icon">3</div>
+            <span class="step-label">Payment</span>
+          </div>
+          
+          <div class="timeline-step ${currentStep >= 4 ? (currentStep === 4 ? 'active' : 'completed') : ''}">
+            <div class="step-icon">4</div>
+            <span class="step-label">Success</span>
+          </div>
         </div>
 
         ${currentStep === 1 ? `

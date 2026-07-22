@@ -1,12 +1,12 @@
 /* PJR Customer Account — Real Firebase Auth (Google + Email/Password) */
 import { store } from '../state.js';
-import { PRODUCTS } from '../mockData.js';
 import { renderAddressCard } from './AddressManager.js';
 import {
   auth, googleProvider,
-  signInWithRedirect,
+  signInWithPopup,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendPasswordResetEmail,
   signOut,
   updateProfile
 } from '../firebaseConfig.js';
@@ -74,6 +74,9 @@ function renderLoginForm() {
         <div class="form-group">
           <label class="form-label">Password</label>
           <input type="password" class="form-input" id="authPassword" placeholder="Enter your password" autocomplete="current-password" />
+          <div style="text-align:right; margin-top:0.4rem;">
+            <button id="authForgotPassword" style="background:none; border:none; color:var(--pjr-teal); font-size:0.8rem; cursor:pointer; font-weight:600; padding:0;">Forgot Password?</button>
+          </div>
         </div>
 
         <!-- Submit -->
@@ -103,7 +106,7 @@ export function renderAccountModal() {
 
   const order = store.activeOrder;
   const addresses = store.addresses;
-  const wishlistProducts = PRODUCTS.filter(p => store.wishlist.includes(p.id));
+  const wishlistProducts = store.products.filter(p => store.wishlist.includes(p.id));
   const steps = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
   const currentStepIndex = steps.indexOf(order.status);
   const progressPercent = (currentStepIndex / (steps.length - 1)) * 100;
@@ -240,6 +243,7 @@ export function initAccountEvents() {
       const toggleBtn  = document.getElementById('authToggleMode');
       const toggleText = document.getElementById('authToggleText');
       const password   = document.getElementById('authPassword');
+      const forgotPwd  = document.getElementById('authForgotPassword');
 
       if (nameGroup)  nameGroup.style.display = isSignUp ? 'block' : 'none';
       if (title)      title.textContent        = isSignUp ? 'Create Account' : 'Welcome Back';
@@ -248,19 +252,47 @@ export function initAccountEvents() {
       if (toggleBtn)  toggleBtn.textContent    = isSignUp ? 'Sign In' : 'Sign Up';
       if (toggleText) toggleText.textContent   = isSignUp ? 'Already have an account?' : "Don't have an account?";
       if (password)   password.placeholder     = isSignUp ? 'Create a password (min 6 chars)' : 'Enter your password';
+      if (forgotPwd)  forgotPwd.style.display  = isSignUp ? 'none' : 'inline-block';
 
       const errEl = document.getElementById('authError');
       if (errEl) errEl.style.display = 'none';
       return;
     }
 
-    // Google Sign-In — use redirect directly (avoids popup-blocked entirely)
+    // Forgot Password
+    if (e.target.id === 'authForgotPassword') {
+      e.preventDefault();
+      const email = document.getElementById('authEmail')?.value.trim();
+      if (!email || !email.includes('@')) {
+        showAuthError('Please enter a valid email address to reset password.');
+        return;
+      }
+      const btn = e.target;
+      const oldText = btn.textContent;
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      try {
+        await sendPasswordResetEmail(auth, email);
+        showAuthError('Password reset email sent! Check your inbox.');
+        document.getElementById('authError').style.color = '#059669'; // green for success
+        document.getElementById('authError').style.backgroundColor = '#d1fae5';
+        document.getElementById('authError').style.borderColor = '#059669';
+      } catch (err) {
+        showAuthError(getErrorMessage(err));
+      } finally {
+        btn.textContent = oldText;
+        btn.disabled = false;
+      }
+      return;
+    }
+
+    // Google Sign-In — use popup
     if (e.target.id === 'googleSignInBtn' || e.target.closest('#googleSignInBtn')) {
       const btn = document.getElementById('googleSignInBtn');
-      if (btn) { btn.disabled = true; btn.textContent = 'Redirecting to Google...'; }
+      if (btn) { btn.disabled = true; btn.textContent = 'Opening Google Login...'; }
       try {
-        await signInWithRedirect(auth, googleProvider);
-        // Page will navigate away → on return, onAuthStateChanged fires automatically
+        await signInWithPopup(auth, googleProvider);
+        // onAuthStateChanged will fire automatically on success
       } catch (err) {
         showAuthError(getErrorMessage(err));
         if (btn) { btn.disabled = false; btn.innerHTML = `${googleIcon} Continue with Google`; }

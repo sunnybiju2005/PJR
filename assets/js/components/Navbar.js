@@ -1,13 +1,17 @@
 /* PJR Sticky Glassmorphism Navbar with Desktop Mega Menu & HTML Page Links */
 import { store } from '../state.js';
-import { MEN_SUBCATEGORIES, WOMEN_SUBCATEGORIES } from '../mockData.js';
+
 
 export function renderNavbar(activePage = 'home') {
   const { itemCount } = store.getCartTotals();
   const wishlistCount = store.wishlist.length;
 
+  // Pages with a dark hero image get a transparent navbar, others get a scrolled (white) navbar by default
+  const isDarkBgPage = ['home', 'men', 'women'].includes(activePage);
+  const navClass = isDarkBgPage ? 'navbar transparent' : 'navbar scrolled';
+
   return `
-    <nav class="navbar transparent" id="mainNavbar">
+    <nav class="${navClass}" id="mainNavbar">
       <div class="container nav-container">
         <a href="index.html" class="brand-logo">
           <span class="brand-name">PJR</span>
@@ -24,19 +28,19 @@ export function renderNavbar(activePage = 'home') {
               <div class="container mega-menu-container">
                 <div class="mega-column">
                   <h5>Men's Apparel</h5>
-                  ${MEN_SUBCATEGORIES.filter(s => s.group === 'Apparel').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'men' && s.group === 'Apparel').map(s => `
                     <a href="mens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
                 <div class="mega-column">
                   <h5>Footwear</h5>
-                  ${MEN_SUBCATEGORIES.filter(s => s.group === 'Footwear').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'men' && s.group === 'Footwear').map(s => `
                     <a href="mens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
                 <div class="mega-column">
                   <h5>Accessories</h5>
-                  ${MEN_SUBCATEGORIES.filter(s => s.group === 'Accessories').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'men' && s.group === 'Accessories').map(s => `
                     <a href="mens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
@@ -58,19 +62,19 @@ export function renderNavbar(activePage = 'home') {
               <div class="container mega-menu-container">
                 <div class="mega-column">
                   <h5>Couture & Tops</h5>
-                  ${WOMEN_SUBCATEGORIES.filter(s => s.group === 'Apparel').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'women' && s.group === 'Apparel').map(s => `
                     <a href="womens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
                 <div class="mega-column">
                   <h5>Luxury Footwear</h5>
-                  ${WOMEN_SUBCATEGORIES.filter(s => s.group === 'Footwear').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'women' && s.group === 'Footwear').map(s => `
                     <a href="womens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
                 <div class="mega-column">
                   <h5>Accessories & Jewels</h5>
-                  ${WOMEN_SUBCATEGORIES.filter(s => s.group === 'Accessories').map(s => `
+                  ${store.subcategories.filter(s => s.parent === 'women' && s.group === 'Accessories').map(s => `
                     <a href="womens.html?subcat=${s.id}" class="mega-link" data-subcat="${s.id}">${s.name}</a>
                   `).join('')}
                 </div>
@@ -129,13 +133,18 @@ export function initNavbarEvents() {
     });
   }
 
-  document.getElementById('searchTrigger')?.addEventListener('click', () => store.openModal('search'));
-  document.getElementById('cartTrigger')?.addEventListener('click', () => store.openModal('cart'));
-
-  document.querySelectorAll('.mega-link').forEach(link => {
-    link.addEventListener('click', () => {
-      const subcat = link.dataset.subcat;
+  // Use event delegation for all navbar clicks so they survive DOM re-renders
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('#searchTrigger')) {
+      store.openModal('search');
+    }
+    if (e.target.closest('#cartTrigger')) {
+      store.openModal('cart');
+    }
+    const megaLink = e.target.closest('.mega-link');
+    if (megaLink) {
+      const subcat = megaLink.dataset.subcat;
       if (subcat) store.setFilter('subcategory', subcat);
-    });
+    }
   });
 }

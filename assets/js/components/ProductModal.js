@@ -1,6 +1,6 @@
 /* PJR Comprehensive Product Detail & Quick View Modal */
 import { store } from '../state.js';
-import { MOCK_REVIEWS } from '../mockData.js';
+
 
 export function renderProductModal() {
   const product = store.selectedProduct;

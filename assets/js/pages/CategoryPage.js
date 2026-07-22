@@ -1,6 +1,6 @@
 /* PJR Dedicated Category Page Renderer (Men, Women, Accessories, Offers) */
 import { store } from '../state.js';
-import { MEN_SUBCATEGORIES, WOMEN_SUBCATEGORIES, ACCESSORIES_SUBCATEGORIES, BRANDS } from '../mockData.js';
+
 import { renderProductCard } from '../components/ProductGrid.js';
 
 export function renderCategoryPage(genderType) {
@@ -12,15 +12,15 @@ export function renderCategoryPage(genderType) {
   let heroImg = 'assets/images/hero-men.png';
 
   if (genderType === 'men') {
-    subcategories = MEN_SUBCATEGORIES;
+    subcategories = store.subcategories.filter(s => s.parent === 'men');
     pageTitle = "Men's Luxury Fashion";
     heroImg = 'assets/images/hero-men.png';
   } else if (genderType === 'women') {
-    subcategories = WOMEN_SUBCATEGORIES;
+    subcategories = store.subcategories.filter(s => s.parent === 'women');
     pageTitle = "Women's Couture & Elegance";
     heroImg = 'assets/images/hero-women.png';
   } else if (genderType === 'accessories') {
-    subcategories = ACCESSORIES_SUBCATEGORIES;
+    subcategories = store.subcategories.filter(s => s.parent === 'accessories');
     pageTitle = 'Luxury Accessories & Watches';
     heroImg = 'assets/images/hero-accessories.png';
   } else {
@@ -110,7 +110,7 @@ export function renderCategoryPage(genderType) {
                   <input type="radio" name="brandFilter" value="all" ${store.filters.brand === 'all' ? 'checked' : ''} />
                   <span>All Brands</span>
                 </label>
-                ${BRANDS.map(b => `
+                ${store.brands.map(b => `
                   <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
                     <input type="radio" name="brandFilter" value="${b.name}" ${store.filters.brand.toLowerCase() === b.name.toLowerCase() ? 'checked' : ''} />
                     <span>${b.name}</span>

@@ -1,16 +1,23 @@
 /* PJR Central Reactive State Store & Multi-Address Store */
-import { PRODUCTS } from './mockData.js';
+import { firestoreService } from './services/firestoreService.js';
 
 class StateStore {
   constructor() {
     this.listeners = new Set();
     this.route = typeof window !== 'undefined' ? (window.location.hash || '#home') : '#home';
 
-    this.cart = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_cart')) ? JSON.parse(localStorage.getItem('pjr_cart')) : [
-      { id: 'pjr-001', title: 'Minimalist Monogram Navy Blazer', price: 8999, size: 'M', color: 'Deep Navy', quantity: 1, image: 'assets/images/hero-men.png' }
-    ];
+    // Dynamic Firebase Collections
+    this.settings = {};
+    this.banners = [];
+    this.categories = [];
+    this.subcategories = [];
+    this.brands = [];
+    this.offers = [];
+    this.products = [];
 
-    this.wishlist = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_wishlist')) ? JSON.parse(localStorage.getItem('pjr_wishlist')) : ['pjr-002'];
+    this.cart = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_cart')) ? JSON.parse(localStorage.getItem('pjr_cart')) : [];
+
+    this.wishlist = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_wishlist')) ? JSON.parse(localStorage.getItem('pjr_wishlist')) : [];
 
     this.addresses = (typeof localStorage !== 'undefined' && localStorage.getItem('pjr_addresses')) ? JSON.parse(localStorage.getItem('pjr_addresses')) : [];
 
@@ -56,6 +63,11 @@ class StateStore {
         window.scrollTo(0, 0);
         this.notify();
       });
+    }
+
+    // Start Realtime Sync
+    if (typeof window !== 'undefined') {
+      firestoreService.initializeRealtimeSync();
     }
   }
 
@@ -208,7 +220,7 @@ class StateStore {
   }
 
   getFilteredProducts() {
-    return PRODUCTS.filter(p => {
+    return this.products.filter(p => {
       if (this.filters.gender !== 'all' && p.gender !== this.filters.gender) return false;
       if (this.filters.subcategory !== 'all' && p.category !== this.filters.subcategory) return false;
       if (this.filters.brand !== 'all' && p.brand.toLowerCase() !== this.filters.brand.toLowerCase()) return false;

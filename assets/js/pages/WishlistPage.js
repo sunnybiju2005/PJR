@@ -1,10 +1,10 @@
 /* PJR Dedicated Wishlist Page Renderer */
 import { store } from '../state.js';
-import { PRODUCTS } from '../mockData.js';
+
 import { renderProductCard } from '../components/ProductGrid.js';
 
 export function renderWishlistPage() {
-  const wishlistProducts = PRODUCTS.filter(p => store.wishlist.includes(p.id));
+  const wishlistProducts = store.products.filter(p => store.wishlist.includes(p.id));
 
   return `
     <div style="background:var(--pjr-deep-navy); color:var(--pjr-pure-white); padding:8rem 0 3.5rem; border-bottom:1px solid rgba(255,255,255,0.1);">
